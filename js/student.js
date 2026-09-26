@@ -49,9 +49,9 @@ function renderIntro() {
   const subject=subjects[meta.subject];
   main.innerHTML = `<div class="eyebrow subject-line"><span class="flag ${subject.flag}" aria-hidden="true"></span><span>${bi(subject.se, subject.nb+' · '+meta.grade+'. trinn')}</span></div>
     <section class="panel hero">${meta.subject==='espanja'?`<img class="cactus" src="${url('assets/cactus.png')}" alt="" width="94" height="132">`:''}<h1 tabindex="-1" lang="${meta.language}">${esc(meta.title)}</h1><p>${bi(meta.description.se,meta.description.nb)}</p><div class="meta"><span>${esc(meta.minutes)} min</span><span>${bi(pack.sections.length+' hárjehusa',pack.sections.length+' øvelser'+(pack.extra?' + EXTRA':''))}</span></div></section>
+    <div class="actions">${btn('start','Álgge','Start','primary')}</div>
     <ol class="steps">${pack.sections.map((s,i) => `<li><span class="step-number">${i+1}</span><span lang="es">${esc(s.title.replace(/^\d · /,''))}</span></li>`).join('')}</ol>
     <details class="lesson" open><summary>${bi('Sátnekoarttat','Se på ordene før du starter')}</summary><div class="lesson-content">${introLesson()}</div></details>
-    <div class="actions">${btn('start','Álgge','Start','primary')}</div>
     <p class="note">${bi('Čájet bohtosiid oahpaheaddjái.', 'Vis resultatet til læreren eller lagre det som PDF. Ingen automatisk innlevering.')}</p>
     <p class="small muted" lang="nb">Svarene beholdes bare i denne nettleserfanen. Unngå navn og personopplysninger i fritekst.</p>`;
   document.querySelector('#start').onclick = () => { run.view = 'exercise'; render(); focusMain(); };
@@ -77,7 +77,7 @@ function renderExercise() {
       <div id="feedback" class="feedback ${rec.correct?'correct':''}" role="status" aria-live="polite">${feedback(q,rec)}</div>
       <p class="small muted" style="margin-top:16px">${bi('Geahččaleamit','Forsøk')}: ${rec.attempts.length} / 3</p>
     </section>
-    <div class="nav">${btn('back','Ruovttoluotta','Tilbake')}${btn('next','Boahtte',run.cursor===all.length-1?'Til EXTRA':'Neste','primary')}</div>`;
+    <div class="nav">${btn('back','Ruovttoluotta','Tilbake')}${btn('next','Boahtte',run.cursor===all.length-1?(pack.extra?'Til EXTRA':'Resultater'):'Neste','primary')}</div>`;
   document.querySelector('#next').disabled = !rec.done;
   document.querySelector('#answer')?.addEventListener('input', e => { draft = e.target.value; });
   document.querySelectorAll('[data-choice]').forEach(button => button.onclick = () => {
