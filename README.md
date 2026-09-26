@@ -10,7 +10,17 @@ Väliaikainen, kokonaan staattinen luokkahuoneversio. Oppilas avaa tehtävälink
 
 Osoitteet toimivat, kun GitHub Pages -julkaisu on valmis. Oppilaan ei tarvitse käydä etusivulla eikä kirjautua.
 
-Ensimmäinen paketti **Mi actividad favorita** sisältää sanastovalinnan (4 kohtaa), kirjoitettavat AR-verbimuodot (3), dialogin ymmärtämisen (3) ja vapaaehtoisen EXTRA-vastauksen. Kesto on noin 10–15 minuuttia oppilaasta riippuen. Suomeen ja pohjoissaameen on omat ainesivut, mutta niihin ei ole vielä julkaistu paketteja.
+Ensimmäinen paketti **Mi actividad favorita** sisältää sanastovalinnan (4 kohtaa), kirjoitettavat AR-verbimuodot (3), dialogin ymmärtämisen (3) ja vapaaehtoisen EXTRA-vastauksen. Kesto on noin 10–15 minuuttia oppilaasta riippuen.
+
+Pohjoissaamen **Bárrastávvalvearbbat** on jaettu neljään itsenäiseen pakettiin: **mannat, goarrut, viehkat ja boahtit**. Kunkin oma osoite on `https://twinningfinn.github.io/GiellaStudio/pohjoissaame/verbit/VERBI/`, missä VERBI korvataan verbin nimellä. Opettajasivu tarjoaa kaikille omat linkit ja QR-koodit. Suomeen ei vielä ole paketteja.
+
+Jokainen verbipaketti säilyttää alkuperäisen prototyypin 9 persoonaa ja kolme vaihetta: valmis vartalo + päätteen valinta, vartalon ja päätteen kokoaminen, kirjoittaminen. Yhteensä 27 kohtaa. Ensimmäinen ja viimeinen vaihe etenevät kolmen persoonan ryhmissä. Palat valitaan painikkeilla; raahaamista ei tarvita. Kirjoittamiseen on saamen kirjainpainikkeet. `∅` tarkoittaa, ettei vartaloon lisätä päätettä. Alkuperäisen prototyypin 36 muotoa on kopioitu muuttamatta.
+
+## Oppilaan navigointi
+
+Jaa **tehtäväpaketin suora linkki**. Oppilaan logo ei ole linkki, eikä tehtäväsivulla ole reittejä etusivulle, opettajasivulle, muihin aineisiin tai muihin paketteihin. Takaisin, seuraava, ohjeet, tulokset ja uusi kierros pysyvät saman paketin sisällä. Kaikki paketit voivat olla käytössä samanaikaisesti, ja kullakin on oma välilehtikohtainen suoritustila.
+
+Tämä on navigoinnin rajaus, ei käyttöoikeusrajaus. Sivusto ja opettajan jakosivu ovat julkisia; toisen tehtävän linkin saanut voi avata sen. Käyttäjän 27.9.2026 täsmennyksen mukaisesti kirjautumista tai pääsyn estämistä ei lisätä.
 
 ## Paikallinen käynnistys
 
@@ -65,9 +75,9 @@ Tehtävädata ja oikeat vastaukset ovat julkisessa lähdekoodissa. Tämä on har
 5. Suorita `node --test tests/*.test.mjs`. Testaa uusi paketti myös selaimessa kokonaan.
 6. Julkaise muutokset vain tämän Classroom-repositorion kautta. Opettajasivun linkki ja QR tulevat automaattisesti.
 
-Nykyinen tehtävämoottori tukee `choice`-monivalintaa ja `write`-kirjoitusvastausta. `answers` sisältää hyväksyttävät vastaukset. `prompt: {se, nb}` näyttää kaksikielisen kysymyksen, `prompt: {es}` espanjankielisen. Kirjoituksessa käytetään `before`, `after` ja `verb` -kenttiä. `hint` sisältää molemmat käyttöliittymäkielet. Osioiden `dialogue` ja `lesson` tuovat dialogin tai verbin mallitaulukon; `vocabulario`-osio näyttää sanaston. `extra` on vapaaehtoinen.
+Nykyinen tehtävämoottori tukee `choice`-monivalintaa, `write`-kirjoitusvastausta ja `pieces`-palavalintoja. `answers` sisältää hyväksyttävät vastaukset. `prompt: {se, nb}` näyttää kaksikielisen kysymyksen, `prompt: {es}` espanjankielisen ja `prompt: {text, language}` muun oppimiskielen kysymyksen. Kirjoituksessa voi vaihtoehtoisesti käyttää `before`, `after` ja `verb` -kenttiä. `hint` sisältää molemmat käyttöliittymäkielet. Osioiden `dialogue` ja `lesson` tuovat dialogin tai verbin mallitaulukon; `vocabulario`-osio näyttää sanaston. `extra` on vapaaehtoinen. `data/sami-verbs.js` kokoaa saamen kolme vaihetta yhteisestä persoonien, vartaloiden ja päätteiden taulukosta. `guided: true` lisää kolmen kohdan väliyhteenvedot.
 
-Ensimmäisen paketin sanastokenttä `es` sekä verbimallien esitystapa on suunniteltu espanjaa varten. Muiden aineiden uusien tehtävätyyppien kielikohtaiset kentät ja tekstit lisätään tämän Classroomin moottoriin silloin, kun niiden ensimmäiset paketit tehdään. Muistipeliä, parien yhdistämistä tai kuuntelua ei ole tässä ensijulkaisussa.
+Ensimmäisen paketin sanastokenttä `es` on suunniteltu espanjaa varten. Saamen paketit käyttävät `introForms`- ja `studyForms`-taulukoita sekä `letters`-kirjainpainikkeita. Muistipeliä, parien yhdistämistä tai kuuntelua ei ole tässä julkaisussa.
 
 ## GitHub-julkaisu
 

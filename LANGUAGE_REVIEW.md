@@ -29,3 +29,7 @@ Sanasto: `cantar → lávlut / å synge`, `bailar → dánsut / å danse`, `escu
 Sanaston tarkistuslähteitä: [Neahttadigisánit: lávlut](https://sanit.oahpa.no/detail/sme/nob/l%C3%A1vlut.html), [UiT Oahpa: Golbma unna spiinnáža](https://kursa.oahpa.no/2012/09/21/golmma-unna-spiinnaza/) ja [Yle: Ante čuojaha gitára](https://yle.fi/a/3-10813274). Nämä eivät vahvista kaikkia tämän julkaisun kokonaisia ohjetekstejä.
 
 Korjaukset tehdään vain Classroom-kansion `data/`- ja `js/`-tiedostoihin. Alkuperäisiä prototyyppejä ei tarvitse muuttaa.
+
+## Saamen verbipaketit 27.9.2026
+
+Neljä verbiä ja kaikki 36 persoonamuotoa kopioitiin nykyisestä oppilasprototyypistä: mannat, goarrut, viehkat ja boahtit. Samasta lähteestä säilytettiin nimet ja ohjeet: **Bárrastávvalvearbbat**, **Vállje gehčosa**, **Vállje mátta ja gehčosa**, **Čále ieš**, **Čále vearbba rievttes hámi**, **Mátta**, **Geažus**, **Ii leat geažus**, **Sámegiela bustávat** ja **Lasit**. Tässä siirrossa muotoja ei käännetty uudelleen.

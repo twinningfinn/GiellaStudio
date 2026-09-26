@@ -1,5 +1,5 @@
-import { packages, subjects } from '../data/packages.js';
-import { url, esc, bi, header } from './ui.js';
+import { packages, subjects } from '../data/packages.js?v=20260927-sami';
+import { url, esc, bi, header, groupLabel } from './ui.js?v=20260927-sami';
 header();
 const main=document.querySelector('main');
 const subject=document.body.dataset.subject;
@@ -7,7 +7,7 @@ const teacher=document.body.dataset.page==='teacher';
 const listed=subject?packages.filter(p=>p.subject===subject):packages;
 function card(p) {
   const s=subjects[p.subject];
-  return `<article class="panel package-card"><p class="eyebrow">${bi(s.se,`${s.nb} · ${p.grade}. trinn`)}</p><h2 lang="${p.language}">${esc(p.title)}</h2><p>${bi(p.description.se,p.description.nb)}</p><div class="meta"><span>${esc(p.minutes)} min</span><span>${bi(p.exercises+' hárjehusa',p.exercises+' øvelser')}</span></div><div class="actions"><a class="button primary" href="${url(p.path)}"><span>${bi('Raba',teacher?'Åpne elevversjonen':'Åpne oppgaven')}</span></a>${teacher?`<button data-copy="${esc(p.id)}">${bi('Máŋge liŋkka','Kopier lenke')}</button><button data-qr="${esc(p.id)}">${bi('Čájet QR-koda','Vis QR-kode')}</button>`:''}</div>${teacher?`<label class="small muted" for="link-${esc(p.id)}">Direkte lenke</label><input class="share-link" id="link-${esc(p.id)}" type="text" readonly value="${esc(url(p.path))}"><div class="copy-status" id="status-${esc(p.id)}" role="status"></div>`:''}</article>`;
+  return `<article class="panel package-card"><p class="eyebrow">${bi(s.se,`${[s.nb,groupLabel(p)].filter(Boolean).join(' · ')}`)}</p><h2 lang="${p.language}">${esc(p.title)}</h2><p>${bi(p.description.se,p.description.nb)}</p><div class="meta"><span>${esc(p.minutes)} min</span><span>${bi(p.exercises+' hárjehusa',p.exercises+' øvelser')}</span></div><div class="actions"><a class="button primary" href="${url(p.path)}"><span>${bi('Raba',teacher?'Åpne elevversjonen':'Åpne oppgaven')}</span></a>${teacher?`<button data-copy="${esc(p.id)}">${bi('Máŋge liŋkka','Kopier lenke')}</button><button data-qr="${esc(p.id)}">${bi('Čájet QR-koda','Vis QR-kode')}</button>`:''}</div>${teacher?`<label class="small muted" for="link-${esc(p.id)}">Direkte lenke</label><input class="share-link" id="link-${esc(p.id)}" type="text" readonly value="${esc(url(p.path))}"><div class="copy-status" id="status-${esc(p.id)}" role="status"></div>`:''}</article>`;
 }
 if(teacher) {
   main.innerHTML=`<h1 tabindex="-1">${bi('Oahpaheaddjái','Til læreren')}</h1><p lang="fi">Jaa tehtävä suoraan linkillä tai näytä QR-koodi luokalle.</p><p class="small muted" lang="fi">Julkinen jakosivu · Classroom v0.1 · Ei oppilasrekisteriä eikä tulosten vastaanottoa.</p>${listed.map(card).join('')}`;

@@ -54,7 +54,7 @@ test('Julkaistut paketit ja kaikki suorat HTML-polut vastaavat toisiaan',async()
     assert(html.includes(`data-package="${p.id}"`));
     for(const [,link] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
       if(link.startsWith('#'))continue;
-      const local=path.resolve(root,p.path,link);assert(local.startsWith(root));assert(fs.existsSync(local),link);
+      const local=path.resolve(root,p.path,link.split('?')[0]);assert(local.startsWith(root));assert(fs.existsSync(local),link);
     }
   }
 });

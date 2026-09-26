@@ -18,9 +18,9 @@ function page(route,title,attributes,student=false) {
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <title>${escape(title)} · GiellaStudio</title>
   <link rel="icon" href="${prefix}assets/icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="${prefix}css/style.css">
+  <link rel="stylesheet" href="${prefix}css/style.css?v=20260927-sami">
 ${!student?`  <script src="${prefix}js/vendor/qrcodegen.js" defer></script>`:''}
-  <script type="module" src="${prefix}js/${student?'student':'catalog'}.js"></script>
+  <script type="module" src="${prefix}js/${student?'student':'catalog'}.js?v=20260927-sami"></script>
 </head>
 <body ${attributes}>
   <a class="skip" href="#main">Bargobihttái / Til oppgaven</a>

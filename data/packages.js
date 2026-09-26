@@ -6,7 +6,13 @@ export const packages = [{
   data: 'data/mi-actividad-favorita.js',
   description: { se: 'Sánit ja cealkagat', nb: 'Fritidsaktiviteter, verb og en kort dialog' },
   minutes: '10–15', exercises: 3
-}];
+}, ...['mannat', 'goarrut', 'viehkat', 'boahtit'].map(verb => ({
+  id: 'sami-' + verb, subject: 'pohjoissaame', grade: '',
+  title: verb, language: 'se', path: 'pohjoissaame/verbit/' + verb + '/',
+  data: 'data/sami-' + verb + '.js',
+  description: { se: 'Bárrastávvalvearbbat · preseansa', nb: 'Verbbrikker · presens' },
+  minutes: '15–20', exercises: 3
+}))];
 export const subjects = {
   espanja: { se: 'Spánskkagiella', nb: 'Spansk', native: 'Español', flag: 'es' },
   suomi: { se: 'Suomagiella', nb: 'Finsk som andrespråk', native: 'Suomi', flag: 'fi' },
