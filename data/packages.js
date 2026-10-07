@@ -6,7 +6,16 @@ export const packages = [{
   data: 'data/mi-actividad-favorita.js',
   description: { se: 'Sánit ja cealkagat', nb: 'Fritidsaktiviteter, verb og en kort dialog' },
   minutes: '10–15', exercises: 3
-}, ...['mannat', 'goarrut', 'viehkat', 'boahtit'].map(verb => ({
+}, ...[1, 2].map(week => ({
+  id: `espanol-semana-${week}`, subject: 'espanja', grade: '8',
+  title: `Español · Semana ${week}`, language: 'es',
+  path: `espanja/8/semana-${week}/`, data: `data/espanol-semana-${week}.js`,
+  teacherOnly: true, worksheet: `output/pdf/espanol-semana-${week}.pdf`,
+  description: week === 1
+    ? { se: 'Dearvvahusat, logut, pronomenat ja sánit', nb: 'Uke 1 · Hilsener, tall 1–15, pronomen og ord' }
+    : { se: 'Vearbbat ja geardduheapmi', nb: 'Uke 2 · Regelmessige AR-, ER- og IR-verb og repetisjon' },
+  minutes: '3 × 15–20', exercises: 3
+})), ...['mannat', 'goarrut', 'viehkat', 'boahtit'].map(verb => ({
   id: 'sami-' + verb, subject: 'pohjoissaame', grade: '',
   title: verb, language: 'se', path: 'pohjoissaame/verbit/' + verb + '/',
   data: 'data/sami-' + verb + '.js',

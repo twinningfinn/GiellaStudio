@@ -12,6 +12,8 @@ function walk(relative) {
     return entry.isDirectory()?walk(file):[file];
   });
 }
-const files=[...roots,...directories.flatMap(walk)].sort();
+const worksheets=['output/pdf/espanol-semana-1.pdf','output/pdf/espanol-semana-2.pdf'];
+for(const file of worksheets) if(!fs.existsSync(path.join(root,file))) throw new Error('Puuttuva tehtävä-PDF: '+file);
+const files=[...roots,...directories.flatMap(walk),...worksheets].sort();
 fs.writeFileSync(path.join(root,'RELEASE_FILES.txt'),files.join('\n')+'\n');
 if(process.argv.includes('--json')) console.log(JSON.stringify(files));else console.log(files.join('\n'));

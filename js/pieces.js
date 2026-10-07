@@ -6,11 +6,11 @@ export function conjugation(forms) {
 export function pieceValue(selection) {
   return selection.stem === null || selection.ending === null ? '' : `${selection.stem} + ${selection.ending || '∅'}`;
 }
-export function pieceControls(q, rec, selection) {
+export function pieceControls(q, rec, selection, language = 'se') {
   const fixed = q.pieces.fixedStem !== null;
   const label = value => value === null ? '…' : value || '∅';
-  return `<div class="assembly" lang="se"><span id="chosen-stem">${esc(label(selection.stem))}</span><span>+</span><span id="chosen-ending">${esc(label(selection.ending))}</span></div>
-    ${['stem', 'ending'].filter(part => !fixed || part !== 'stem').map(part => `<fieldset class="piece-bank"><legend>${bi(part === 'stem' ? 'Mátta' : 'Geažus', part === 'stem' ? 'Stamme' : 'Endelse')}</legend><div class="piece-options">${q.pieces[part === 'stem' ? 'stems' : 'endings'].map((value, i) => `<button type="button" data-piece="${part}" data-index="${i}" lang="se" aria-pressed="${selection[part] === value}" ${rec.done ? 'disabled' : ''}>${value ? esc(value) : bi('Ii leat geažus', 'Ingen endelse · ∅')}</button>`).join('')}</div></fieldset>`).join('')}`;
+  return `<div class="assembly" lang="${esc(language)}"><span id="chosen-stem">${esc(label(selection.stem))}</span><span>+</span><span id="chosen-ending">${esc(label(selection.ending))}</span></div>
+    ${['stem', 'ending'].filter(part => !fixed || part !== 'stem').map(part => `<fieldset class="piece-bank"><legend>${bi(part === 'stem' ? 'Mátta' : 'Geažus', part === 'stem' ? 'Stamme' : 'Endelse')}</legend><div class="piece-options">${q.pieces[part === 'stem' ? 'stems' : 'endings'].map((value, i) => `<button type="button" data-piece="${part}" data-index="${i}" lang="${esc(language)}" aria-pressed="${selection[part] === value}" ${rec.done ? 'disabled' : ''}>${value ? esc(value) : bi('Ii leat geažus', 'Ingen endelse · ∅')}</button>`).join('')}</div></fieldset>`).join('')}`;
 }
 export function bindPieces(q, selection, changed) {
   document.querySelectorAll('[data-piece]').forEach(button => button.onclick = () => {

@@ -4,4 +4,6 @@ node_modules/
 Thumbs.db
 *.log
 *.pdf
+!output/pdf/espanol-semana-1.pdf
+!output/pdf/espanol-semana-2.pdf
 *.zip

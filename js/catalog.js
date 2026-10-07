@@ -1,21 +1,22 @@
-import { packages, subjects } from '../data/packages.js?v=20260927-sami';
-import { url, esc, bi, header, groupLabel } from './ui.js?v=20260927-sami';
+import { packages, subjects } from '../data/packages.js?v=20261007-fieldpack';
+import { url, esc, bi, header, groupLabel } from './ui.js?v=20261007-fieldpack';
 header();
 const main=document.querySelector('main');
 const subject=document.body.dataset.subject;
 const teacher=document.body.dataset.page==='teacher';
-const listed=subject?packages.filter(p=>p.subject===subject):packages;
+const available=packages.filter(p=>teacher || !p.teacherOnly);
+const listed=subject?available.filter(p=>p.subject===subject):available;
 function card(p) {
   const s=subjects[p.subject];
   return `<article class="panel package-card"><p class="eyebrow">${bi(s.se,`${[s.nb,groupLabel(p)].filter(Boolean).join(' · ')}`)}</p><h2 lang="${p.language}">${esc(p.title)}</h2><p>${bi(p.description.se,p.description.nb)}</p><div class="meta"><span>${esc(p.minutes)} min</span><span>${bi(p.exercises+' hárjehusa',p.exercises+' øvelser')}</span></div><div class="actions"><a class="button primary" href="${url(p.path)}"><span>${bi('Raba',teacher?'Åpne elevversjonen':'Åpne oppgaven')}</span></a>${teacher?`<button data-copy="${esc(p.id)}">${bi('Máŋge liŋkka','Kopier lenke')}</button><button data-qr="${esc(p.id)}">${bi('Čájet QR-koda','Vis QR-kode')}</button>`:''}</div>${teacher?`<label class="small muted" for="link-${esc(p.id)}">Direkte lenke</label><input class="share-link" id="link-${esc(p.id)}" type="text" readonly value="${esc(url(p.path))}"><div class="copy-status" id="status-${esc(p.id)}" role="status"></div>`:''}</article>`;
 }
 if(teacher) {
-  main.innerHTML=`<h1 tabindex="-1">${bi('Oahpaheaddjái','Til læreren')}</h1><p lang="fi">Jaa tehtävä suoraan linkillä tai näytä QR-koodi luokalle.</p><p class="small muted" lang="fi">Julkinen jakosivu · Classroom v0.1 · Ei oppilasrekisteriä eikä tulosten vastaanottoa.</p>${listed.map(card).join('')}`;
+  main.innerHTML=`<h1 tabindex="-1">${bi('Oahpaheaddjái','Til læreren')}</h1><p lang="fi">Jaa tehtävä suoraan linkillä tai näytä QR-koodi luokalle.</p><section class="panel"><h2 lang="fi">Kahden viikon espanjapaketti</h2><p lang="fi">Jaa Semana 1:n linkki ensimmäiselle viikolle ja Semana 2:n linkki toiselle. Molemmissa on ladattava tehtävä-PDF ilman verkkoyhteyttä työskentelyyn. Oppilas palauttaa täytetyt paperit skannattuna PDF:nä tai verkkotehtävien tulosraportin Teamsiin.</p><p class="small muted" lang="fi">Viikkopaketit löytyvät tältä jakosivulta, eivät yleisestä oppilasluettelosta. Suoran linkin saanut voi avata paketin; viikkokohtaista pääsyn lukitusta ei ole.</p></section><p class="small muted" lang="fi">Julkinen jakosivu · Classroom v0.1 · Ei oppilasrekisteriä eikä tulosten vastaanottoa.</p>${listed.map(card).join('')}`;
 } else if(subject) {
   const s=subjects[subject];
   main.innerHTML=`<a href="${url('')}">${bi('Ruovttoluotta','Tilbake')}</a><div class="subject-line" style="margin-top:24px"><span class="flag ${s.flag}" aria-hidden="true"></span><h1 tabindex="-1">${esc(s.native)}</h1></div>${listed.length?listed.map(card).join(''):`<div class="empty">${bi('Bargobihtát','Ingen oppgavepakker publisert ennå.')}</div>`}`;
 } else {
-  main.innerHTML=`<h1 tabindex="-1">${bi('Bures boahtin','Velkommen')}</h1><p>${bi('Vállje fága.','Velg et fag, eller åpne oppgavelenken fra læreren.')}</p><div class="subject-grid">${Object.entries(subjects).map(([id,s])=>`<article class="subject-card ${id}"><span class="flag ${s.flag}" aria-hidden="true"></span><h2>${esc(s.native)}</h2><p class="small muted">${packages.filter(p=>p.subject===id).length} · ${bi('Bargobihtát','Oppgavepakker')}</p><a href="${url(id+'/')}">${bi('Raba','Åpne')} →</a></article>`).join('')}</div><h2 style="margin-top:36px">${bi('Bargobihtát','Oppgavepakker')}</h2>${packages.map(card).join('')}`;
+  main.innerHTML=`<h1 tabindex="-1">${bi('Bures boahtin','Velkommen')}</h1><p>${bi('Vállje fága.','Velg et fag, eller åpne oppgavelenken fra læreren.')}</p><div class="subject-grid">${Object.entries(subjects).map(([id,s])=>`<article class="subject-card ${id}"><span class="flag ${s.flag}" aria-hidden="true"></span><h2>${esc(s.native)}</h2><p class="small muted">${available.filter(p=>p.subject===id).length} · ${bi('Bargobihtát','Oppgavepakker')}</p><a href="${url(id+'/')}">${bi('Raba','Åpne')} →</a></article>`).join('')}</div><h2 style="margin-top:36px">${bi('Bargobihtát','Oppgavepakker')}</h2>${available.map(card).join('')}`;
 }
 document.querySelectorAll('[data-copy]').forEach(button=>button.onclick=async()=>{
   const p=packages.find(p=>p.id===button.dataset.copy);

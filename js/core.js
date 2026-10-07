@@ -4,7 +4,23 @@ export function normalize(value) {
 }
 export function questions(pack) { return pack.sections.flatMap(section => section.questions); }
 export function createRun(pack, now = new Date().toISOString()) {
-  return { version: pack.version, started: now, finished: null, cursor: 0, view: 'intro', extra: '', records: {} };
+  return { version: pack.version, started: now, finished: null, cursor: 0, view: 'intro', extra: '', records: {}, drafts: {} };
+}
+// Luonnos ei ole vastausyritys. Hyväksytään vain tämän tehtävän omat kentät ja valinnat.
+export function setDraft(run, question, value) {
+  run.drafts ||= {};
+  if (getRecord(run, question.id).done) { delete run.drafts[question.id]; return; }
+  if (question.type === 'pieces') {
+    if (!value || typeof value !== 'object') return;
+    const pieces = question.pieces;
+    run.drafts[question.id] = {
+      stem: pieces.fixedStem ?? (pieces.stems.includes(value.stem) ? value.stem : null),
+      ending: pieces.endings.includes(value.ending) ? value.ending : null
+    };
+  } else if (typeof value === 'string') {
+    run.drafts[question.id] = question.type === 'choice'
+      ? (question.options.includes(value) ? value : '') : value.slice(0, 100);
+  }
 }
 export function getRecord(run, id) {
   return run.records[id] ||= { attempts: [], hint: false, model: false, done: false, correct: false };
@@ -18,6 +34,7 @@ export function submit(run, question, value) {
   record.correct = question.answers.some(answer => normalize(answer) === normalize(clean));
   record.model = !record.correct && record.attempts.length >= 3;
   record.done = record.correct || record.model;
+  if (record.done && run.drafts) delete run.drafts[question.id];
   return record.correct ? 'correct' : record.model ? 'model' : 'retry';
 }
 export function summary(run, pack) {
@@ -51,6 +68,9 @@ export function restoreRun(raw, pack) {
         if (typeof attempt !== 'string') return null;
         submit(run, question, attempt);
       }
+    }
+    for (const question of all) {
+      if (saved.drafts && Object.hasOwn(saved.drafts, question.id)) setDraft(run, question, saved.drafts[question.id]);
     }
     const firstOpen = all.findIndex(q => !getRecord(run, q.id).done);
     const maxCursor = firstOpen === -1 ? all.length - 1 : firstOpen;
