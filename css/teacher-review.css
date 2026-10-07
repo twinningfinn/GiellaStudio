@@ -1,0 +1,52 @@
+.teacher-review { max-width:1050px; }
+.teacher-review>h1 { margin-top:24px; }
+.review-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:24px 0; padding:16px 20px; border:1px solid var(--line); border-radius:14px; background:white; }
+.review-toggle { display:flex; align-items:center; gap:12px; font-weight:600; min-height:30px; cursor:pointer; }
+.review-toggle input { width:22px; height:22px; accent-color:var(--accent); flex-shrink:0; }
+.review-jumps { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; padding:22px; background:var(--yellow); border-radius:16px; }
+.review-jumps ul { margin:10px 0 0; padding-left:20px; }
+.review-jumps li { margin:8px 0; }
+.review-package { margin-top:52px; border-top:4px solid var(--accent); padding-top:24px; }
+.review-package-heading { margin-bottom:34px; }
+.review-package .actions { margin-bottom:24px; }
+.review-section { scroll-margin-top:24px; margin:34px 0; }
+.review-section>h3 { font-size:24px; }
+.review-questions { list-style:none; padding:0; display:grid; gap:18px; }
+.review-question { padding:24px; border:1px solid var(--line); border-radius:16px; background:white; overflow-wrap:anywhere; }
+.review-question-heading { display:flex; gap:14px; align-items:flex-start; margin-bottom:16px; }
+.review-question-heading h4 { font-size:20px; line-height:1.45; margin:0; }
+.review-number { flex-shrink:0; min-width:32px; height:32px; display:grid; place-items:center; border-radius:50%; background:var(--yellow); font-weight:600; }
+.review-options { margin:0 0 18px; padding-left:28px; display:grid; gap:8px; font-size:18px; }
+.review-kind { color:var(--muted); font-size:14px; }
+.review-pieces { margin:0 0 20px; display:grid; gap:10px; }
+.review-pieces>div { display:grid; grid-template-columns:150px minmax(0,1fr); gap:12px; }
+.review-pieces dt { color:var(--muted); font-size:14px; }
+.review-pieces dd { margin:0; }
+.review-answer { border-left:3px solid #31734c; border-radius:0 9px 9px 0; background:#edf7ef; padding:12px 16px; }
+.review-question h5 { margin:0 0 6px; font-size:14px; font-weight:600; }
+.review-answer p { margin:0; }
+.review-answer p+p { margin-top:6px; }
+.review-help { margin-top:16px; font-size:15px; }
+.review-help summary { cursor:pointer; min-height:36px; padding:6px 0; color:var(--muted); }
+.review-help h5 { margin-top:14px; }
+.review-help p { margin:0 0 12px; }
+.review-forms { display:grid; gap:9px; margin:16px 0; }
+.review-forms>div { display:grid; grid-template-columns:minmax(120px,1fr) minmax(0,1fr); gap:14px; }
+.review-forms span { overflow-wrap:anywhere; }
+.hide-review-answers .review-solution { display:none; }
+.review-top-link { display:inline-block; padding:12px 0; }
+@media(max-width:620px) {
+  .review-toolbar { align-items:flex-start; padding:14px; }
+  .review-jumps { grid-template-columns:1fr; padding:18px; }
+  .review-question { padding:18px 15px; }
+  .review-question-heading { gap:10px; }
+  .review-question-heading h4 { font-size:18px; }
+  .review-pieces>div { grid-template-columns:1fr; gap:2px; }
+  .review-package { margin-top:36px; }
+}
+@media print {
+  .review-toolbar,.review-jumps,.review-top-link,.teacher-review>a { display:none!important; }
+  .review-package { margin-top:20px; }
+  .review-question { break-inside:avoid; padding:12px; }
+  .review-question-heading h4 { font-size:13pt; }
+}

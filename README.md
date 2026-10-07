@@ -4,6 +4,8 @@ Väliaikainen, kokonaan staattinen luokkahuoneversio. Oppilas avaa tehtävälink
 
 ## Kahden viikon espanjapaketti 7.10.2026
 
+**Opettajan nopea katsaus:** `https://twinningfinn.github.io/GiellaStudio/opettaja/katsaus/` näyttää molempien viikkojen kaikki tehtävät samalla sivulla. Aihevalikosta voi hypätä osioon; mallivastaukset voi näyttää tai piilottaa. Vihjeet ja oppimisohjeet avautuvat tarvittaessa. Katsaus ei suorita oppilaan tehtäviä eikä muuta tallennettuja vastauksia. Opettajasivun jokaisessa pakettikortissa on myös **Katso kaikki tehtävät** -linkki kyseiseen pakettiin.
+
 - **Semana 1:** tervehdykset ja kuulumiset ("Estoy OK"), numerot 1–15, persoonapronominit ja Övingsheften sanasto. Osoite: `https://twinningfinn.github.io/GiellaStudio/espanja/8/semana-1/`.
 - **Semana 2:** säännölliset AR-, ER- ja IR-verbit, ensin tuetut päätevalinnat ja sitten kokonaiset muodot, lopuksi kertaus. Osoite: `https://twinningfinn.github.io/GiellaStudio/espanja/8/semana-2/`.
 - Työskentelyehdotus on kolme noin 15–20 minuutin kertaa kummallekin viikolle. Oppilas etenee omaan tahtiin. Viikkojen linkit jaetaan erikseen opettajasivulta; pakettien välille ei ole oppilaslinkkiä. Viikot eivät näy yleisessä oppilasluettelossa. Tämä ei estä pääsyä suoran linkin avulla.

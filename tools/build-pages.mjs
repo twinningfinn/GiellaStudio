@@ -5,11 +5,11 @@ import { fileURLToPath } from 'node:url';
 import { packages, subjects } from '../data/packages.js';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const escape = text => String(text).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function page(route,title,attributes,student=false) {
+function page(route,title,attributes,student=false,review=false) {
   if(route && !/^[a-z0-9/-]+\/$/.test(route)) throw new Error('Käytä polussa vain pieniä a–z-kirjaimia, numeroita ja yhdysmerkkejä: '+route);
   const prefix='../'.repeat(route.split('/').filter(Boolean).length) || './';
   const content=`<!doctype html>
-<html lang="se">
+<html lang="${review?'fi':'se'}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,8 +19,9 @@ function page(route,title,attributes,student=false) {
   <title>${escape(title)} · GiellaStudio</title>
   <link rel="icon" href="${prefix}assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="${prefix}css/style.css?v=20261007-fieldpack">
-${!student?`  <script src="${prefix}js/vendor/qrcodegen.js" defer></script>`:''}
-  <script type="module" src="${prefix}js/${student?'student':'catalog'}.js?v=20261007-fieldpack"></script>
+${review?`  <link rel="stylesheet" href="${prefix}css/teacher-review.css?v=20261007-review">`:''}
+${!student&&!review?`  <script src="${prefix}js/vendor/qrcodegen.js" defer></script>`:''}
+  <script type="module" src="${prefix}js/${review?'teacher-review':student?'student':'catalog'}.js?v=${student?'20261007-fieldpack':'20261007-review'}"></script>
 </head>
 <body ${attributes}>
   <a class="skip" href="#main">Bargobihttái / Til oppgaven</a>
@@ -35,6 +36,7 @@ ${!student?`  <script src="${prefix}js/vendor/qrcodegen.js" defer></script>`:''}
 }
 page('','Bures boahtin','data-page="home"');
 page('opettaja/','Oahpaheaddjái','data-page="teacher"');
+page('opettaja/katsaus/','Opettajan tehtäväkatsaus','data-page="teacher-review"',false,true);
 for(const [id,s] of Object.entries(subjects)) page(id+'/',s.native,`data-subject="${id}"`);
 for(const p of packages) page(p.path,p.title,`data-package="${escape(p.id)}"`,true);
 console.log('Luotu etusivu, opettajasivu, ainesivut ja '+packages.length+' tehtäväpaketin sivua.');

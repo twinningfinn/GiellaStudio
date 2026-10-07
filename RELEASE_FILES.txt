@@ -8,6 +8,7 @@ THIRD_PARTY.md
 assets/cactus.png
 assets/icon.svg
 css/style.css
+css/teacher-review.css
 data/espanol-campo-content.js
 data/espanol-semana-1.js
 data/espanol-semana-2.js
@@ -27,9 +28,11 @@ js/catalog.js
 js/core.js
 js/pieces.js
 js/student.js
+js/teacher-review.js
 js/ui.js
 js/vendor/qrcodegen.js
 opettaja/index.html
+opettaja/katsaus/index.html
 output/pdf/espanol-semana-1.pdf
 output/pdf/espanol-semana-2.pdf
 package.json
