@@ -1,25 +1,24 @@
 # GiellaStudio v0.1 — Classroom
 
-Väliaikainen, kokonaan staattinen luokkahuoneversio. Oppilas avaa tehtävälinkin, tekee harjoitukset ja näyttää tuloksen opettajalle tai palauttaa PDF:n. Käyttöliittymässä pohjoissaame on ensisijainen, bokmål tukikieli ja espanja oppimissisällön kieli.
+Väliaikainen, kokonaan staattinen luokkahuoneversio. Oppilas avaa tehtävälinkin, tekee harjoitukset ja näyttää tuloksen opettajalle tai palauttaa PDF:n. Espanjan aiheissa käyttöliittymä on lyhyesti espanjaksi. Käännöstehtävissä pohjoissaame ja bokmål tukevat oppimista.
 
-## Kahden viikon espanjapaketti 7.10.2026
+## Espanjan aiheet 7.10.2026
 
-**Opettajan nopea katsaus:** `https://twinningfinn.github.io/GiellaStudio/opettaja/katsaus/` näyttää molempien viikkojen kaikki tehtävät samalla sivulla. Aihevalikosta voi hypätä osioon; mallivastaukset voi näyttää tai piilottaa. Vihjeet ja oppimisohjeet avautuvat tarvittaessa. Katsaus ei suorita oppilaan tehtäviä eikä muuta tallennettuja vastauksia. Opettajasivun jokaisessa pakettikortissa on myös **Katso kaikki tehtävät** -linkki kyseiseen pakettiin.
+Oppilaan etusivu: https://twinningfinn.github.io/GiellaStudio/espanja/
 
-- **Semana 1:** tervehdykset ja kuulumiset ("Estoy OK"), numerot 1–15, persoonapronominit ja Övingsheften sanasto. Osoite: `https://twinningfinn.github.io/GiellaStudio/espanja/8/semana-1/`.
-- **Semana 2:** säännölliset AR-, ER- ja IR-verbit, ensin tuetut päätevalinnat ja sitten kokonaiset muodot, lopuksi kertaus. Osoite: `https://twinningfinn.github.io/GiellaStudio/espanja/8/semana-2/`.
-- Työskentelyehdotus on kolme noin 15–20 minuutin kertaa kummallekin viikolle. Oppilas etenee omaan tahtiin. Viikkojen linkit jaetaan erikseen opettajasivulta; pakettien välille ei ole oppilaslinkkiä. Viikot eivät näy yleisessä oppilasluettelossa. Tämä ei estä pääsyä suoran linkin avulla.
-- Lähtöaineisto on opettajan **espanol_geardduheapmi_ovingshefte1.pdf**, 11 sivua: sivut 2–3 tervehdykset, 4 numerot, 5 persoonapronominit, 6–8 verbit, 9 sanasto, 10 kuulumiset ja 11 verbimallit. Sivu 10 tarkistettiin kuvana: siinä lukee **Estoy OK**. Alkuperäistä vihkoa tai sen kuvia ei julkaista. Tehtävät ovat uusia sovelluksia näistä aiheista; Gente 8:n tehtäviä tai sivuja ei kopioida.
-- Näillä kahdella paketilla `persistent: true` säilyttää vastaukset ja tarkistamattomat luonnokset saman laitteen selaimen `localStorage`-muistissa. Selaintietojen tyhjentäminen tai yksityistilan sulkeminen voi poistaa ne. Vastauksia ei lähetetä palvelimelle. Muiden pakettien välilehtikohtainen tallennus säilyy.
-- **Lataa tehtävä-PDF ennen lähtöä.** Aloitussivun PDF-painike lataa tulostettavan, käsin täytettävän tehtävävihkon. Sivusto tarvitsee verkon avatessa. PDF:ssä on oppimisohjeet, vastaustilaa sekä erillinen itsearviointi ja vastausosa: ensin oma yritys, sitten tarkistus toisella värillä. Tulosta tarvittaessa vain tehtäväsivut.
-- **Teams-palautus:** paperiversiosta kuvataan/skannataan täytetyt sivut yhdeksi PDF:ksi ja liitetään Teams-tehtävään yhteyden palattua. Verkkoversiossa kaikki tehtävät tehtyään oppilas tallentaa tulosraportin selaimen tulostuksella PDF:ksi ja palauttaa sen Teamsiin. Raportti sisältää vastaukset, yritykset ja käytetyn avun. EXTRA-vapaatekstin arvioi opettaja.
-- Palaute on harjoittelupalautetta: vihjeet, uusi yritys ja mallivastaus kolmen virheen jälkeen. Pisteet kuvaavat tehtäväkierrosta, eivät varmennettua osaamistasoa. Uudet pohjoissaamen ohjetekstit on koottu kielentarkistustiedostoon.
+Seitsemän laatikkoa: AR-verbos, IR-verbos, ER-verbos, Saludos y frases, Números 1–15, Pronombres ja Palabras. Jokainen avautuu sanakortteihin; oppilas voi siirtyä yhdistämiseen tai muistipeliin ja omaan Reto-tehtäväsarjaan. Aikarajaa ei ole. Lyhyet espanjankieliset käyttötekstit ja alkuperäisen prototyypin lämmin oranssi/terrakotta-paletti.
 
-Tulostettavat tiedostot: `output/pdf/espanol-semana-1.pdf` ja `output/pdf/espanol-semana-2.pdf`. Ne rakennetaan samasta tehtävädatasta komennolla `python tools/build-field-pdfs.py` (ReportLab, pypdf, Node.js ja Unicode-fontti tarvitaan). PDF-tiedostot ovat tarkoitukselliset poikkeukset yleiseen PDF-ohitukseen; paikalliset testitulosteet jäävät `_local`-kansioon.
+Kaikki 101 tehtävää ovat säilyneet. Lähteenä on opettajan uusin espanol_geardduheapmi_ovingshefte1.pdf: sivulla 10 on **Estoy OK**. Gente 8:n sivuja ei kopioida. Vanhojen oppilaslinkkien avaaminen ohjaa aihevalikkoon. Aiemmat vastaukset tuodaan samoilla tehtävätunnisteilla aihekohtaiseen tallennukseen, jos ne ovat samassa selaimessa.
+
+**Opettajan katsaus:** https://twinningfinn.github.io/GiellaStudio/opettaja/katsaus/ näyttää kaikki tehtävät, kortit ja peliparit. Mallivastaukset saa piiloon. Katsaus ei käsittele oppilaan tallennuksia.
+
+**PDF:** output/pdf/espanol-temas.pdf sisältää tehtävät aiheittain sivuilla 1–9 ja vastaukset sivuilla 10–12. Vanhojen PDF-linkkien takana on sama päivitetty paketti. Oppilaan omat vastaukset voi tulostaa myös kesken harjoittelun kohdasta **Mis respuestas · PDF**. Tallenna selaimen tulostuksella PDF:ksi ja palauta Teamsiin. Kortit ja pelit ovat harjoittelua; Reto-raportissa näkyvät tehtäväyritykset, tarkistamaton luonnos ja käytetty apu.
+
+Espanjan edistyminen tallentuu tällä laitteella selaimen localStorageen. Verkkosivu tarvitsee yhteyden avautuessaan; ladattu PDF toimii ilman yhteyttä. Vastauksia ei lähetetä palvelimelle. Muut aineet käyttävät aiempaa tallennustapaa.
 
 ## Käyttö
 
-- Oppilaalle: `https://twinningfinn.github.io/GiellaStudio/espanja/8/mi-actividad-favorita/`
+- Oppilaalle: `https://twinningfinn.github.io/GiellaStudio/espanja/`
 - Opettajalle: `https://twinningfinn.github.io/GiellaStudio/opettaja/`
 - Etusivu: `https://twinningfinn.github.io/GiellaStudio/`
 
@@ -77,7 +76,7 @@ QR tuotetaan selaimessa mukana toimitetulla kirjastolla. QR-palvelua tai ulkoist
 
 Ei kirjautumista, salasanoja, oppilaskoodeja, tietokantaa, analytiikkaa, pilvitallennusta tai suojattua hallintapaneelia. Opettajasivu on julkinen ja sisältää vain jakotyökalut.
 
-Jätetyt vastaukset, tarkistamattomat luonnokset ja EXTRA säilyvät oletuksena `sessionStorage`-muistissa saman välilehden päivitysten yli. Kahden viikon espanjapaketit käyttävät yllä kuvattua `localStorage`-tallennusta. Tyhjennys tai uusi kierros poistaa edellisen suorituksen; selain voi palauttaa istunnon omalla välilehtien palautustoiminnollaan. Jos selaimen tallennus estyy, harjoitus toimii muistissa ja sivu neuvoo säilyttämään välilehden PDF-tallennukseen asti. Älä kirjoita nimiä tai henkilötietoja EXTRA-kenttään.
+Jätetyt vastaukset, tarkistamattomat luonnokset ja EXTRA säilyvät oletuksena `sessionStorage`-muistissa saman välilehden päivitysten yli. Espanjan aiheet käyttävät yllä kuvattua `localStorage`-tallennusta. Tyhjennys tai uusi kierros poistaa edellisen suorituksen; selain voi palauttaa istunnon omalla välilehtien palautustoiminnollaan. Jos selaimen tallennus estyy, harjoitus toimii muistissa ja sivu neuvoo säilyttämään välilehden PDF-tallennukseen asti. Älä kirjoita nimiä tai henkilötietoja EXTRA-kenttään.
 
 Tehtävädata ja oikeat vastaukset ovat julkisessa lähdekoodissa. Tämä on harjoitteluväline, ei suojattu koe. GitHub Pages toimittaa staattiset tiedostot; sovellus ei lähetä vastaussisältöjä sinne.
 

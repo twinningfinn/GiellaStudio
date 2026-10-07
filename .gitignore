@@ -3,7 +3,10 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+__pycache__/
+*.pyc
 *.pdf
 !output/pdf/espanol-semana-1.pdf
 !output/pdf/espanol-semana-2.pdf
+!output/pdf/espanol-temas.pdf
 *.zip

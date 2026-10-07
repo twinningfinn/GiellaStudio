@@ -1,0 +1,364 @@
+#!/usr/bin/env python3
+"""Build the Spanish topic worksheet from data/espanol-topics.js.
+
+Install: python -m pip install reportlab pypdf
+Run: python tools/build-topic-pdf.py
+Optional: --node /path/to/node --font /path/to/regular.ttf --bold-font /path/to/bold.ttf
+Use --output to build a review copy without replacing output/pdf/espanol-temas.pdf.
+Segoe UI is preferred on Windows; DejaVu Sans is the automatic Linux fallback.
+The same fonts and source data reproduce the approved page layout.
+"""
+from __future__ import annotations
+
+import argparse
+import html
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import (BaseDocTemplate, Flowable, Frame, KeepTogether,
+    PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle)
+from pypdf import PdfReader
+
+ROOT = Path(__file__).resolve().parent.parent
+PAGE_W, PAGE_H = A4
+MARGIN = 16 * mm
+WIDTH = PAGE_W - 2 * MARGIN
+ACCENT = colors.HexColor("#c94716")
+RED = colors.HexColor("#ae2634")
+INK = colors.HexColor("#382b26")
+MUTED = colors.HexColor("#455660")
+PALE = colors.HexColor("#fff1e9")
+LINE = colors.HexColor("#c6b6ae")
+
+
+def register_fonts(regular_path=None, bold_path=None):
+    candidates = [
+        (Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts/segoeui.ttf",
+         Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts/segoeuib.ttf"),
+        (Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")),
+    ]
+    if regular_path and bold_path:
+        candidates = [(Path(regular_path), Path(bold_path))]
+    for regular, bold in candidates:
+        if regular.exists() and bold.exists():
+            pdfmetrics.registerFont(TTFont("Worksheet", str(regular)))
+            pdfmetrics.registerFont(TTFont("Worksheet-Bold", str(bold)))
+            pdfmetrics.registerFontFamily("Worksheet", normal="Worksheet", bold="Worksheet-Bold")
+            return
+    raise SystemExit("Font files not found. Install Segoe UI or DejaVu Sans, or pass --font and --bold-font with Unicode TrueType fonts.")
+
+
+def clean(value):
+    return str(value).replace("\u2011", "-").replace("\u2013", "-").replace("\u2014", "-")
+
+
+def esc(value):
+    return html.escape(clean(value), quote=False)
+
+
+def translated(value):
+    if isinstance(value, str):
+        return esc(value)
+    if not value:
+        return ""
+    parts = [esc(value[key]) for key in ("es", "se", "nb", "text") if value.get(key)]
+    return "<br/>".join(dict.fromkeys(parts))
+
+
+def styles():
+    base = dict(fontName="Worksheet", textColor=INK, alignment=TA_LEFT)
+    return {
+        "title": ParagraphStyle("title", fontSize=23, leading=28, spaceAfter=7, **base),
+        "subtitle": ParagraphStyle("subtitle", fontSize=11, leading=15, spaceAfter=8, **base),
+        "h1": ParagraphStyle("h1", fontSize=15, leading=19, spaceAfter=7, fontName="Worksheet-Bold", textColor=INK),
+        "h2": ParagraphStyle("h2", fontSize=11, leading=15, spaceBefore=7, spaceAfter=5, fontName="Worksheet-Bold", textColor=INK),
+        "body": ParagraphStyle("body", fontSize=10, leading=14, spaceAfter=5, **base),
+        "small": ParagraphStyle("small", fontSize=8.6, leading=11.5, spaceAfter=4, **base),
+        "tiny": ParagraphStyle("tiny", fontSize=8, leading=10.5, spaceAfter=2, **base),
+        "question": ParagraphStyle("question", fontSize=10.6, leading=14.5, spaceAfter=4, **base),
+        "options": ParagraphStyle("options", fontSize=10, leading=14.5, spaceAfter=0, **base),
+        "table": ParagraphStyle("table", fontSize=9, leading=12, **base),
+        "thead": ParagraphStyle("thead", fontSize=8.7, leading=11.5, fontName="Worksheet-Bold", textColor=INK),
+    }
+
+
+class AnswerLines(Flowable):
+    def __init__(self, count=1, spacing=7 * mm):
+        super().__init__()
+        self.count = count
+        self.spacing = spacing
+        self.height = count * spacing + 3
+
+    def wrap(self, avail_width, avail_height):
+        self.width = avail_width
+        return self.width, self.height
+
+    def draw(self):
+        self.canv.setStrokeColor(LINE)
+        self.canv.setLineWidth(0.4)
+        for index in range(self.count):
+            y = self.height - (index + 1) * self.spacing
+            self.canv.line(0, y, self.width, y)
+
+
+def table(rows, style_map, widths, headers=None, compact=False):
+    data = []
+    if headers:
+        data.append([Paragraph(esc(value), style_map["thead"]) for value in headers])
+    data.extend([[Paragraph(esc(value), style_map["table"]) for value in row] for row in rows])
+    result = Table(data, colWidths=widths, hAlign="LEFT", repeatRows=1 if headers else 0)
+    commands = [
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 5),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 2 if compact else 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2 if compact else 3),
+        ("LINEBELOW", (0, 0), (-1, -1), 0.3, LINE),
+    ]
+    if headers:
+        commands += [("BACKGROUND", (0, 0), (-1, 0), PALE)]
+    result.setStyle(TableStyle(commands))
+    return result
+
+
+def question_prompt(question):
+    if question.get("prompt"):
+        return translated(question["prompt"]).replace("<br/>", " / ")
+    before, after = question.get("before", ""), question.get("after", "")
+    prompt = f"{esc(before)} <b>____________________________</b> {esc(after)}"
+    if question.get("verb"):
+        prompt += f" &nbsp; ({esc(question['verb'])})"
+    return prompt
+
+
+def question_card(question, code, style_map, keep=True):
+    result = [Paragraph(f"<b>{code}.</b> {question_prompt(question)}", style_map["question"])]
+    kind = question["type"]
+    if kind == "choice":
+        # Letters survive black-and-white copying and make the key unambiguous.
+        options = [f"<b>{chr(65 + index)})</b> {esc(option)}" for index, option in enumerate(question["options"])]
+        result.append(Paragraph(" &nbsp; &nbsp; ".join(options), style_map["options"]))
+        result.append(Spacer(1, 7))
+    elif kind == "pieces":
+        pieces = question["pieces"]
+        if pieces.get("fixedStem"):
+            stem = pieces["fixedStem"]
+            result.append(Paragraph(f"<b>{esc(stem)} + __________ = ________________________</b>", style_map["body"]))
+        else:
+            result.append(Paragraph("Mátta / Stamme: " + " · ".join(map(esc, pieces.get("stems", []))), style_map["small"]))
+            result.append(Paragraph("__________ + __________ = ________________________", style_map["body"]))
+        result.append(Spacer(1, 5))
+    else:
+        result.append(AnswerLines(1) if question.get("prompt") else Spacer(1, 12))
+        result.append(Spacer(1, 3))
+    return KeepTogether(result) if keep else result
+
+
+def answer_text(question):
+    answers = question.get("answers", [])
+    if question["type"] == "choice":
+        values = []
+        for answer in answers:
+            index = question["options"].index(answer)
+            values.append(f"{chr(65 + index)}) {answer}")
+        return " / ".join(values)
+    values = []
+    for answer in answers:
+        values.append(answer + " = " + answer.replace(" + ", "") if question["type"] == "pieces" else answer)
+    return " / ".join(values)
+
+
+class TopicDoc(BaseDocTemplate):
+    def __init__(self, destination):
+        super().__init__(str(destination), pagesize=A4,
+                         leftMargin=MARGIN, rightMargin=MARGIN,
+                         topMargin=20*mm, bottomMargin=18*mm,
+                         title="Español por temas - GiellaStudio", author="GiellaStudio")
+        self.in_answers = False
+        self.answer_page = None
+        frame = Frame(self.leftMargin, self.bottomMargin, self.width, self.height,
+                      id="normal", leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
+        self.addPageTemplates(PageTemplate(id="normal", frames=frame, onPageEnd=self.draw_frame))
+
+    def draw_frame(self, canvas, doc):
+        canvas.saveState()
+        canvas.setFillColor(ACCENT)
+        canvas.rect(0, PAGE_H - 5*mm, PAGE_W, 5*mm, fill=1, stroke=0)
+        canvas.setFont("Worksheet-Bold", 8.5)
+        canvas.drawString(MARGIN, PAGE_H - 12*mm, "GIELLASTUDIO  /  ESPAÑOL")
+        canvas.setFont("Worksheet", 8.5)
+        canvas.drawRightString(PAGE_W - MARGIN, PAGE_H - 12*mm,
+                              "RESPUESTAS" if self.in_answers else "POR TEMAS")
+        canvas.setStrokeColor(LINE)
+        canvas.setLineWidth(.4)
+        canvas.line(MARGIN, 13.5*mm, PAGE_W-MARGIN, 13.5*mm)
+        canvas.setFillColor(MUTED)
+        canvas.setFont("Worksheet", 8)
+        canvas.drawString(MARGIN, 9*mm, "Respuestas" if self.in_answers else "Ejercicios")
+        canvas.drawRightString(PAGE_W - MARGIN, 9*mm, str(doc.page))
+        canvas.restoreState()
+
+    def afterFlowable(self, flowable):
+        if getattr(flowable, "is_answer_heading", False):
+            self.in_answers = True
+            self.answer_page = self.page
+
+
+def read_data(node):
+    source = ROOT / "data/espanol-topics.js"
+    script = "import(process.argv[1]).then(m => process.stdout.write(JSON.stringify(m)))"
+    return json.loads(subprocess.check_output([node, "--input-type=module", "-e", script, source.as_uri()]).decode("utf-8"))
+
+
+def spanish(value):
+    if isinstance(value, str):
+        return value
+    return (value or {}).get("es", "")
+
+
+def topic_support(topic, style_map):
+    story = []
+    forms = topic.get("studyForms")
+    words = topic.get("studyWords", [])
+    if forms:
+        sets = [(topic.get("verb") or next((q.get("verb") for q in topic["questions"] if q.get("verb")), ""), forms)]
+        sets += [(v["verb"], v["forms"]) for v in topic.get("additionalStudyForms", [])]
+        if words:
+            story.append(Paragraph(" · ".join(f"<b>{esc(w['es'])}</b> = {esc(w['se'])} / {esc(w['nb'])}" for w in words), style_map["small"]))
+        if len(sets) == 2:
+            rows = [[main[0], " + ".join(main[1:]) + " = " + "".join(main[1:]),
+                     " + ".join(second[1:]) + " = " + "".join(second[1:])]
+                    for main, second in zip(sets[0][1], sets[1][1])]
+            story.append(table(rows, style_map, [WIDTH*.32, WIDTH*.34, WIDTH*.34],
+                                    ["Pronombre", sets[0][0], sets[1][0]]))
+        else:
+            story.append(table([[p, f"{s} + {e}", s+e] for p,s,e in forms], style_map,
+                                    [WIDTH*.4, WIDTH*.3, WIDTH*.3], ["Pronombre", "Raíz + terminación", "Verbo"]))
+    elif words:
+        story.append(table([[w.get("es", ""), w.get("se", ""), w.get("nb", "")] for w in words], style_map,
+                                [WIDTH*.34, WIDTH*.32, WIDTH*.34],
+                                ["Español", "Davvisámegiella", "Bokmål"], compact=topic["title"] == "Palabras"))
+    return story
+
+
+def build(topics, destination, font=None, bold_font=None):
+    register_fonts(font, bold_font)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    st = styles()
+    st["h1"].textColor = ACCENT
+    st["h1"].fontSize = 18
+    st["h1"].leading = 22
+    st["h2"].textColor = RED
+    doc = TopicDoc(destination)
+    story = []
+    for ti, topic in enumerate(topics, 1):
+        if ti > 1:
+            story.append(PageBreak())
+        story.append(Paragraph(f"{ti} · {esc(topic['title'])}", st["h1"]))
+        instruction = spanish(topic.get("instruction"))
+        if instruction:
+            story.append(Paragraph(esc(instruction), st["body"]))
+        lesson = spanish(topic.get("lessonText"))
+        if lesson:
+            story.append(Paragraph(esc(lesson), st["small"]))
+        story += topic_support(topic, st)
+        exercise_heading = [Paragraph("Practica", st["h2"])]
+        endings = next((q["pieces"]["endings"] for q in topic["questions"] if q["type"] == "pieces"), None)
+        if endings:
+            exercise_heading.append(Paragraph("<b>Terminaciones:</b> " + " · ".join(map(esc, endings)), st["body"]))
+        for qi, question in enumerate(topic["questions"], 1):
+            if topic["title"] == "Palabras" and question["type"] == "write":
+                remaining = list(enumerate(topic["questions"][qi-1:], qi))
+                rows = []
+                for start in range(0, len(remaining), 2):
+                    row = [question_card(q, f"{ti}.{number}", st, keep=False) for number, q in remaining[start:start+2]]
+                    rows.append(row + ([""] if len(row) == 1 else []))
+                columns = Table(rows, colWidths=[WIDTH/2]*2, hAlign="LEFT")
+                columns.setStyle(TableStyle([
+                    ("VALIGN",(0,0),(-1,-1),"TOP"),
+                    ("LEFTPADDING",(0,0),(-1,-1),0),
+                    ("RIGHTPADDING",(0,0),(-1,-1),12),
+                    ("TOPPADDING",(0,0),(-1,-1),2),
+                    ("BOTTOMPADDING",(0,0),(-1,-1),2),
+                ]))
+                story.append(columns)
+                break
+            if qi == 1:
+                story.append(KeepTogether(exercise_heading + question_card(question, f"{ti}.{qi}", st, keep=False)))
+            else:
+                story.append(question_card(question, f"{ti}.{qi}", st))
+
+    story.append(PageBreak())
+    heading = Paragraph("Respuestas", st["h1"])
+    heading.is_answer_heading = True
+    story += [heading, Paragraph("Primero intenta responder. Después corrige con otro color.", st["body"])]
+    for ti, topic in enumerate(topics, 1):
+        rows = [[f"{ti}.{qi}", answer_text(q)] for qi, q in enumerate(topic["questions"], 1)]
+        answer_block = [Paragraph(f"{ti} · {esc(topic['title'])}", st["h2"]),
+                        table(rows, st, [WIDTH*.12, WIDTH*.88], compact=True), Spacer(1, 5)]
+        story.append(KeepTogether(answer_block))
+    doc.build(story)
+    reader = PdfReader(destination)
+    text = "\n".join(p.extract_text() or "" for p in reader.pages)
+    for ti, topic in enumerate(topics, 1):
+        for qi, q in enumerate(topic["questions"], 1):
+            assert f"{ti}.{qi}." in text
+            for answer in q["answers"]:
+                assert clean(answer) in text, answer
+    assert "Estoy OK" in text
+    for forbidden in ["Semana", "semana", "Vahkku", "Uke", "15-20", "Iešárvvoštallan"]:
+        assert forbidden not in text, forbidden
+    assert "\ufffd" not in text and "\u25a0" not in text
+    return {"file": str(destination), "pages": len(reader.pages), "questions":sum(len(t["questions"]) for t in topics),
+            "answer_key_starts":doc.answer_page}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--node", default=shutil.which("node"), help="Node.js executable (defaults to PATH).")
+    parser.add_argument("--font", type=Path, help="Regular Unicode TrueType font.")
+    parser.add_argument("--bold-font", type=Path, help="Bold Unicode TrueType font.")
+    parser.add_argument("--output", type=Path, default=ROOT / "output/pdf/espanol-temas.pdf",
+                        help="Output PDF (defaults to the repository's topic worksheet).")
+    args = parser.parse_args()
+    if not args.node:
+        parser.error("Node.js was not found. Install Node.js or pass --node /path/to/node.")
+    if bool(args.font) != bool(args.bold_font):
+        parser.error("Pass both --font and --bold-font, or neither.")
+    module = read_data(args.node)
+    data = module.get("default") or module.get("topics")
+    if isinstance(data, dict):
+        topics = data.get("sections") or list(data.values())
+    else:
+        topics = data
+    if not topics:
+        raise ValueError("No topic data in espanol-topics.js")
+    merged = []
+    for topic in topics:
+        sections = topic["sections"]
+        words = {word["es"]: word for section in sections for word in section.get("studyWords", [])}
+        merged.append({
+            "title":topic["title"],
+            "questions":[q for section in sections for q in section["questions"]],
+            "instruction":{"es":" ".join(dict.fromkeys(spanish(s.get("instruction")) for s in sections))},
+            "lessonText":{"es":" ".join(dict.fromkeys(spanish(s.get("lessonText")) for s in sections))},
+            "studyWords":list(words.values()),
+            "studyForms":sections[0].get("studyForms"),
+            "additionalStudyForms":[{"verb":s["questions"][0]["verb"], "forms":s["studyForms"]} for s in sections[1:] if s.get("studyForms")],
+        })
+    print(json.dumps(build(merged, args.output.resolve(), args.font, args.bold_font), ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

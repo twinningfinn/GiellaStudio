@@ -35,6 +35,17 @@
 .review-forms span { overflow-wrap:anywhere; }
 .hide-review-answers .review-solution { display:none; }
 .review-top-link { display:inline-block; padding:12px 0; }
+.review-topic-jump { font-weight:700; font-size:18px; }
+.review-games { scroll-margin-top:24px; }
+.review-pair-headings,.review-card-list>li { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; }
+.review-pair-headings { font-size:13px; font-weight:600; color:var(--muted); margin-bottom:8px; }
+.review-card-list { list-style:none; margin:0; padding:0; }
+.review-card-list>li { padding:12px 0; border-top:1px solid var(--line); overflow-wrap:anywhere; }
+.review-card-front { font-weight:600; }
+.review-card-back .se { color:var(--blue); }
+.review-card-back .nb { color:var(--accent); }
+.review-card-list .verb-tags { margin:5px 0 0; }
+.review-card-list .verb-tags>span { font-size:12px; padding:2px 6px; }
 @media(max-width:620px) {
   .review-toolbar { align-items:flex-start; padding:14px; }
   .review-jumps { grid-template-columns:1fr; padding:18px; }

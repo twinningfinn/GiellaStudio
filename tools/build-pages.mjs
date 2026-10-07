@@ -5,29 +5,32 @@ import { fileURLToPath } from 'node:url';
 import { packages, subjects } from '../data/packages.js';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const escape = text => String(text).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function page(route,title,attributes,student=false,review=false) {
+function page(route,title,attributes,student=false,review=false,topic=false,legacy=false) {
   if(route && !/^[a-z0-9/-]+\/$/.test(route)) throw new Error('Käytä polussa vain pieniä a–z-kirjaimia, numeroita ja yhdysmerkkejä: '+route);
   const prefix='../'.repeat(route.split('/').filter(Boolean).length) || './';
+  const spanish=topic||route==='espanja/'||review||legacy;
+  const script=legacy?'legacy-topics':topic?'topic':route==='espanja/'?'es-home':review?'teacher-review':student?'student':'catalog';
   const content=`<!doctype html>
-<html lang="${review?'fi':'se'}">
+<html lang="${review?'fi':spanish?'es':'se'}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#b32132">
+  <meta name="theme-color" content="${spanish?'#e95216':'#b32132'}">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <title>${escape(title)} · GiellaStudio</title>
   <link rel="icon" href="${prefix}assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="${prefix}css/style.css?v=20261007-fieldpack">
-${review?`  <link rel="stylesheet" href="${prefix}css/teacher-review.css?v=20261007-review">`:''}
+${spanish?`  <link rel="stylesheet" href="${prefix}css/spanish.css?v=20261007-topics">`:''}
+${review?`  <link rel="stylesheet" href="${prefix}css/teacher-review.css?v=20261007-topics">`:''}
 ${!student&&!review?`  <script src="${prefix}js/vendor/qrcodegen.js" defer></script>`:''}
-  <script type="module" src="${prefix}js/${review?'teacher-review':student?'student':'catalog'}.js?v=${student?'20261007-fieldpack':'20261007-review'}"></script>
+  <script type="module" src="${prefix}js/${script}.js?v=20261007-topics"></script>
 </head>
-<body ${attributes}>
-  <a class="skip" href="#main">Bargobihttái / Til oppgaven</a>
+<body ${attributes} ${spanish?'class="spanish"':''}>
+  <a class="skip" href="#main">${spanish?'Ir al contenido':'Bargobihttái / Til oppgaven'}</a>
   <header id="header"><span class="brand">GiellaStudio</span></header>
-  <main id="main" ${student?'class="student"':''}><p lang="nb">Åpner oppgaven…</p><noscript><p lang="nb">Slå på JavaScript for å bruke oppgavene.</p></noscript></main>
-  <footer class="no-print">GiellaStudio · Classroom v0.1${student?'':` · <a href="${prefix}opettaja/">Oahpaheaddjái / Til læreren</a>`}</footer>
+  <main id="main" ${student?'class="student"':''}><p>${spanish?'Cargando…':'Åpner oppgaven…'}</p><noscript><p>${spanish?'Activa JavaScript.':'Slå på JavaScript for å bruke oppgavene.'}</p>${legacy?`<a href="${prefix}espanja/">Español</a>`:''}</noscript></main>
+  <footer class="no-print">GiellaStudio${student?'':` · <a href="${prefix}opettaja/">${spanish?'Profesor':'Oahpaheaddjái / Til læreren'}</a>`}</footer>
 </body>
 </html>
 `;
@@ -38,5 +41,6 @@ page('','Bures boahtin','data-page="home"');
 page('opettaja/','Oahpaheaddjái','data-page="teacher"');
 page('opettaja/katsaus/','Opettajan tehtäväkatsaus','data-page="teacher-review"',false,true);
 for(const [id,s] of Object.entries(subjects)) page(id+'/',s.native,`data-subject="${id}"`);
-for(const p of packages) page(p.path,p.title,`data-package="${escape(p.id)}"`,true);
+for(const p of packages) page(p.path,p.title,`data-package="${escape(p.id)}"`,true,false,p.topic);
+for(const week of [1,2]) page(`espanja/8/semana-${week}/`,'Español','',false,false,false,true);
 console.log('Luotu etusivu, opettajasivu, ainesivut ja '+packages.length+' tehtäväpaketin sivua.');

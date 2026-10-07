@@ -5,7 +5,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.json':'application/json; charset=utf-8' };
 types['.pdf']='application/pdf';
-const allowed = /^(index\.html|(?:opettaja|espanja|suomi|pohjoissaame|assets|css|js|data)\/|output\/pdf\/espanol-semana-[12]\.pdf$)/;
+const allowed = /^(index\.html|(?:opettaja|espanja|suomi|pohjoissaame|assets|css|js|data)\/|output\/pdf\/espanol-(?:temas|semana-[12])\.pdf$)/;
 const server=http.createServer((req,res)=> {
   try {
     if(!['GET','HEAD'].includes(req.method)) {res.writeHead(405);res.end();return;}

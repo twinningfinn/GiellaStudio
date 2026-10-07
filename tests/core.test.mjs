@@ -43,7 +43,8 @@ test('Julkaistut paketit ja kaikki suorat HTML-polut vastaavat toisiaan',async()
   const root=fileURLToPath(new URL('../',import.meta.url));const ids=new Set();
   for(const p of packages) {
     assert(!ids.has(p.id));ids.add(p.id);
-    const data=(await import('../'+p.data)).default;
+    const module=await import('../'+p.data);
+    const data=p.topic?module.topics.find(topic=>topic.id===p.id):module.default;
     assert.equal(data.id,p.id);
     const qids=new Set();
     for(const q of questions(data)) {
