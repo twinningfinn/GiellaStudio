@@ -11,6 +11,8 @@ css/spanish.css
 css/style.css
 css/teacher-review.css
 data/espanol-campo-content.js
+data/espanol-examples.js
+data/espanol-instructions.js
 data/espanol-semana-1.js
 data/espanol-semana-2.js
 data/espanol-topics.js
@@ -38,6 +40,7 @@ js/core.js
 js/es-home.js
 js/legacy-topics.js
 js/pieces.js
+js/spanish-text.js
 js/student.js
 js/teacher-review.js
 js/topic-state.js
@@ -59,7 +62,9 @@ suomi/index.html
 tests/core.test.mjs
 tests/drafts.test.mjs
 tests/espanol.test.mjs
+tests/examples.test.mjs
 tests/sami.test.mjs
+tests/spanish-text.test.mjs
 tests/topic-state.test.mjs
 tests/topics.test.mjs
 tools/build-field-pdfs.py

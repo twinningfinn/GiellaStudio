@@ -1,4 +1,4 @@
-import {topics} from './espanol-topics.js';
+import {topics} from './espanol-topics.js?v=20261007-sentences';
 // Lisää julkaistut paketit tähän luetteloon. Sisältö ladataan vain omalta sivustolta.
 export const packages = [...topics.map(topic=>({
   id:topic.id, subject:'espanja', grade:'8', title:topic.title, language:'es', topic:true,

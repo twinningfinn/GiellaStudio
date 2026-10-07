@@ -21,10 +21,10 @@ function page(route,title,attributes,student=false,review=false,topic=false,lega
   <title>${escape(title)} · GiellaStudio</title>
   <link rel="icon" href="${prefix}assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="${prefix}css/style.css?v=20261007-fieldpack">
-${spanish?`  <link rel="stylesheet" href="${prefix}css/spanish.css?v=20261007-topics">`:''}
-${review?`  <link rel="stylesheet" href="${prefix}css/teacher-review.css?v=20261007-topics">`:''}
+${spanish?`  <link rel="stylesheet" href="${prefix}css/spanish.css?v=20261007-sentences">`:''}
+${review?`  <link rel="stylesheet" href="${prefix}css/teacher-review.css?v=20261007-sentences">`:''}
 ${!student&&!review?`  <script src="${prefix}js/vendor/qrcodegen.js" defer></script>`:''}
-  <script type="module" src="${prefix}js/${script}.js?v=20261007-topics"></script>
+  <script type="module" src="${prefix}js/${script}.js?v=20261007-sentences"></script>
 </head>
 <body ${attributes} ${spanish?'class="spanish"':''}>
   <a class="skip" href="#main">${spanish?'Ir al contenido':'Bargobihttái / Til oppgaven'}</a>

@@ -1,4 +1,4 @@
-import { packages, subjects } from '../data/packages.js?v=20261007-topics';
+import { packages, subjects } from '../data/packages.js?v=20261007-sentences';
 import { url, esc, bi, header, groupLabel } from './ui.js?v=20261007-fieldpack';
 header();
 const main=document.querySelector('main');

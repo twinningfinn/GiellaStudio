@@ -1,5 +1,7 @@
-import { packages } from '../data/packages.js?v=20261007-topics';
+import { packages } from '../data/packages.js?v=20261007-sentences';
 import { url, esc, bi, promptText, header, focusMain } from './ui.js?v=20261007-fieldpack';
+import { grammarText, instructionMarkup, questionLabel, answerMarkup } from './spanish-text.js';
+import { instructions } from '../data/espanol-instructions.js';
 
 header();
 const main = document.querySelector('main');
@@ -14,17 +16,18 @@ const reviewUrl = id => {
   return link.href;
 };
 const sectionId = (meta, index) => `review-${meta.id}-${index}`;
-const bilingual = value => value?.es ? `<span lang="es">${esc(value.es)}</span>` : value ? bi(value.se || '', value.nb || '') : '';
+const bilingual = value => value?.es ? instructionMarkup(value) : value ? bi(value.se || '', value.nb || '') : '';
+const languageText = (value, language) => language === 'es' ? grammarText(value) : esc(value);
 const tags = value => [value.regularity, value.verbGroup].filter(Boolean).map(tag => `<span>${esc(tag)}</span>`).join('');
 async function loadPackage(meta) {
-  const module = await import(url(meta.data));
+  const module = await import(url(meta.data)+(meta.topic?'?v=20261007-sentences':''));
   const pack = meta.topic ? module.topics?.find(topic => topic.id === meta.id) : module.default;
   if (!pack) throw new Error('Tehtävän sisältö puuttuu: ' + meta.id);
   return {meta,pack};
 }
 
 function wordList(words = [], language = 'es') {
-  return `<div class="word-list">${words.map(word => `<div class="word"><strong lang="${esc(language)}">${esc(word.es)}</strong>${bilingual(word)}${tags(word) ? `<div class="verb-tags">${tags(word)}</div>` : ''}</div>`).join('')}</div>`;
+  return `<div class="word-list">${words.map(word => `<div class="word"><strong lang="${esc(language)}">${languageText(word.es, language)}</strong>${bi(word.se || '', word.nb || '')}${tags(word) ? `<div class="verb-tags">${tags(word)}</div>` : ''}</div>`).join('')}</div>`;
 }
 function forms(rows, language) {
   if (!rows?.length) return '';
@@ -40,6 +43,7 @@ function sectionSupport(section, pack, language) {
   return content ? `<details class="lesson"><summary>Oppimisohje ja tukimateriaali</summary><div class="lesson-content">${content}</div></details>` : '';
 }
 function prompt(question, language) {
+  if (language === 'es' && (question.context || question.person)) return questionLabel(question);
   if (question.prompt) {
     return language === 'es' && question.person && question.verb
       ? `<span lang="es"><span class="person">${esc(question.person)}</span> · ${esc(question.verb)}</span>`
@@ -49,20 +53,20 @@ function prompt(question, language) {
 }
 function questionCard(question, number, language) {
   let task = '';
-  if (question.type === 'choice') task = `<ol class="review-options" type="A" lang="${esc(language)}">${question.options.map(option => `<li>${esc(option)}</li>`).join('')}</ol>`;
+  if (question.type === 'choice') task = `<ol class="review-options" type="A" lang="${esc(language)}">${question.options.map(option => `<li>${languageText(option, language)}</li>`).join('')}</ol>`;
   else if (question.type === 'pieces') {
     const fixed = question.pieces.fixedStem;
     task = `<dl class="review-pieces"><div><dt>${fixed == null ? 'Vartalovaihtoehdot' : 'Valmis vartalo'}</dt><dd lang="${esc(language)}">${fixed == null ? question.pieces.stems.map(esc).join(' · ') : esc(fixed)}</dd></div><div><dt>Päätevaihtoehdot</dt><dd class="ending" lang="${esc(language)}">${question.pieces.endings.map(value => esc(value || '∅')).join(' · ')}</dd></div></dl>`;
   } else task = '<p class="review-kind">Kirjoitettava vastaus</p>';
   const assistance = question.hint || question.explanation || question.studyForms
     ? `<details class="review-help"><summary>Vihje ja palautteen perustelu</summary>${question.hint ? `<h5>Vihje</h5><p>${bilingual(question.hint)}</p>` : ''}${question.explanation ? `<div class="review-solution"><h5>Palautteen perustelu</h5><p>${bilingual(question.explanation)}</p></div>` : ''}${question.studyForms ? `<h5>Taivutusmalli</h5>${forms(question.studyForms, language)}` : ''}</details>` : '';
-  return `<li class="review-question"><div class="review-question-heading"><span class="review-number">${number}</span><h4>${prompt(question, language)}</h4></div>${tags(question) ? `<div class="verb-tags" lang="es">${tags(question)}</div>` : ''}${task}<div class="review-solution review-answer"><h5>Mallivastaus</h5><p lang="${esc(language)}">${esc(question.model || question.answers[0])}</p>${question.answers.length > 1 ? `<p class="small">Hyväksyttävät vastaukset: <span lang="${esc(language)}">${question.answers.map(esc).join(' / ')}</span></p>` : ''}</div>${assistance}</li>`;
+  return `<li class="review-question"><div class="review-question-heading"><span class="review-number">${number}</span><h4>${prompt(question, language)}</h4></div>${question.instruction ? `<p class="review-instruction">${instructionMarkup(question.instruction)}</p>` : ''}${tags(question) ? `<div class="verb-tags" lang="es">${tags(question)}</div>` : ''}${task}<div class="review-solution review-answer"><h5>Mallivastaus</h5><p lang="${esc(language)}">${language === 'es' ? answerMarkup(question) : esc(question.model || question.answers[0])}</p>${question.example ? `<p class="review-example" lang="es">${grammarText(question.example)}</p>` : ''}${question.answers.length > 1 ? `<p class="small">Hyväksyttävät vastaukset: <span lang="${esc(language)}">${question.answers.map(answer => languageText(answer, language)).join(' / ')}</span></p>` : ''}</div>${assistance}</li>`;
 }
 function gamePreviews(meta, pack) {
   const cards = pack.cards || [];
   const pairs = pack.pairs || [];
   const gameName = pack.game === 'memory' ? 'Muistipeli' : 'Yhdistä parit';
-  return `${cards.length ? `<details class="lesson review-games" id="review-${esc(meta.id)}-cards"><summary>Tarjetas · ${cards.length} sanakorttia</summary><div class="lesson-content"><div class="review-pair-headings"><span>Etupuoli</span><span class="review-solution">Kääntöpuoli</span></div><ol class="review-card-list">${cards.map(card => `<li><div class="review-card-front" lang="${esc(meta.language)}">${esc(card.front)}${tags(card) ? `<div class="verb-tags">${tags(card)}</div>` : ''}</div><div class="review-solution review-card-back">${card.se || card.nb ? bilingual(card) : `<span lang="${esc(meta.language)}">${esc(card.back)}</span>`}</div></li>`).join('')}</ol></div></details>` : ''}${pairs.length ? `<details class="lesson review-games" id="review-${esc(meta.id)}-pairs"><summary>${gameName} · ${pairs.length} paria</summary><div class="lesson-content"><p class="small muted">Samaan riviin kuuluvat kortit muodostavat oikean parin.</p><ol class="review-card-list">${pairs.map(pair => `<li><span lang="${esc(meta.language)}">${esc(pair.left)}</span><span class="review-solution" lang="${pack.verbGroup?'es':'nb'}">${esc(pair.right)}</span></li>`).join('')}</ol></div></details>` : ''}`;
+  return `${cards.length ? `<details class="lesson review-games" id="review-${esc(meta.id)}-cards"><summary>Tarjetas · ${cards.length} sanakorttia</summary><div class="lesson-content"><p class="review-instruction">${instructionMarkup(instructions.cards)}</p><div class="review-pair-headings"><span>Etupuoli</span><span class="review-solution">Kääntöpuoli</span></div><ol class="review-card-list">${cards.map(card => `<li><div class="review-card-front" lang="${esc(meta.language)}">${languageText(card.front, meta.language)}${tags(card) ? `<div class="verb-tags">${tags(card)}</div>` : ''}</div><div class="review-solution review-card-back">${card.se || card.nb ? bi(card.se || '', card.nb || '') : `<span lang="${esc(meta.language)}">${languageText(card.back, meta.language)}</span>`}${card.example ? `<p class="review-example" lang="es">${grammarText(card.example)}</p>` : ''}</div></li>`).join('')}</ol></div></details>` : ''}${pairs.length ? `<details class="lesson review-games" id="review-${esc(meta.id)}-pairs"><summary>${gameName} · ${pairs.length} paria</summary><div class="lesson-content"><p class="review-instruction">${instructionMarkup(instructions[pack.game === 'memory' ? 'memory' : 'match'])}</p><p class="small muted">Samaan riviin kuuluvat kortit muodostavat oikean parin.</p><ol class="review-card-list">${pairs.map(pair => `<li><span lang="${esc(meta.language)}">${languageText(pair.left, meta.language)}</span><div class="review-solution"><span lang="${pack.verbGroup?'es':'nb'}">${languageText(pair.right, pack.verbGroup ? 'es' : 'nb')}</span>${pair.example ? `<p class="review-example" lang="es">${grammarText(pair.example)}</p>` : ''}</div></li>`).join('')}</ol></div></details>` : ''}`;
 }
 function packageReview(meta, pack) {
   let number = 0;

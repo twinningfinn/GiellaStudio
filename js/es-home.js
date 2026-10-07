@@ -1,4 +1,4 @@
-import {topics} from '../data/espanol-topics.js?v=20261007-topics';
+import {topics} from '../data/espanol-topics.js?v=20261007-sentences';
 import {url,esc} from './ui.js';
 import {readTopic} from './topic-state.js';
 import {summary} from './core.js';

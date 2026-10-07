@@ -14,6 +14,7 @@ import argparse
 import html
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -39,6 +40,46 @@ INK = colors.HexColor("#382b26")
 MUTED = colors.HexColor("#455660")
 PALE = colors.HexColor("#fff1e9")
 LINE = colors.HexColor("#c6b6ae")
+PRONOUNS = {"yo", "tú", "él", "ella", "nosotros", "nosotras", "vosotros", "vosotras", "ellos", "ellas"}
+FORM_ENDINGS = {}
+
+
+class Rich(str):
+    """Markup constructed by this renderer, never raw source HTML."""
+
+
+def red(value):
+    return f'<font color="#ae2634"><b>{esc(value)}</b></font>'
+
+
+def rich(value, verbs=True):
+    if isinstance(value, Rich):
+        return str(value)
+    text = clean(value)
+    parts, previous = [], 0
+    for token in re.finditer(r"\b[\wÁÉÍÓÚÜÑáéíóúüñ]+\b", text):
+        parts.append(esc(text[previous:token.start()]))
+        word = token.group()
+        if word.lower() in PRONOUNS:
+            parts.append(red(word))
+        elif verbs and word.lower() in FORM_ENDINGS:
+            ending = FORM_ENDINGS[word.lower()]
+            parts.append(esc(word[:-len(ending)]) + red(word[-len(ending):]))
+        else:
+            parts.append(esc(word))
+        previous = token.end()
+    parts.append(esc(text[previous:]))
+    return "".join(parts)
+
+
+def instruction_block(value, style_map):
+    text = " &nbsp; · &nbsp; ".join(f'<b>{language.upper()}</b> {rich(value[language], verbs=False) if language == "es" else esc(value[language])}'
+                          for language in ("es", "se", "nb") if value.get(language))
+    return Paragraph(text, style_map["small"])
+
+
+def instruction_key(question):
+    return "writeVerb" if question["type"] == "write" and question.get("verb") else question["type"]
 
 
 def register_fonts(regular_path=None, bold_path=None):
@@ -69,10 +110,10 @@ def esc(value):
 
 def translated(value):
     if isinstance(value, str):
-        return esc(value)
+        return rich(value)
     if not value:
         return ""
-    parts = [esc(value[key]) for key in ("es", "se", "nb", "text") if value.get(key)]
+    parts = [rich(value[key]) if key in ("es", "text") else esc(value[key]) for key in ("es", "se", "nb", "text") if value.get(key)]
     return "<br/>".join(dict.fromkeys(parts))
 
 
@@ -115,8 +156,8 @@ class AnswerLines(Flowable):
 def table(rows, style_map, widths, headers=None, compact=False):
     data = []
     if headers:
-        data.append([Paragraph(esc(value), style_map["thead"]) for value in headers])
-    data.extend([[Paragraph(esc(value), style_map["table"]) for value in row] for row in rows])
+        data.append([Paragraph(rich(value), style_map["thead"]) for value in headers])
+    data.extend([[Paragraph(rich(value), style_map["table"]) for value in row] for row in rows])
     result = Table(data, colWidths=widths, hAlign="LEFT", repeatRows=1 if headers else 0)
     commands = [
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
@@ -133,10 +174,18 @@ def table(rows, style_map, widths, headers=None, compact=False):
 
 
 def question_prompt(question):
+    if question.get("context"):
+        context = question["context"]
+        person = context["person"][:1].upper() + context["person"][1:]
+        after = context["after"]
+        if after and after[-1] not in ".!?":
+            after += "."
+        return (f'{rich(person)} <b>____________________________</b> '
+                f'{rich(after)} &nbsp; ({esc(question["verb"])})')
     if question.get("prompt"):
         return translated(question["prompt"]).replace("<br/>", " / ")
     before, after = question.get("before", ""), question.get("after", "")
-    prompt = f"{esc(before)} <b>____________________________</b> {esc(after)}"
+    prompt = f"{rich(before)} <b>____________________________</b> {rich(after)}"
     if question.get("verb"):
         prompt += f" &nbsp; ({esc(question['verb'])})"
     return prompt
@@ -147,7 +196,7 @@ def question_card(question, code, style_map, keep=True):
     kind = question["type"]
     if kind == "choice":
         # Letters survive black-and-white copying and make the key unambiguous.
-        options = [f"<b>{chr(65 + index)})</b> {esc(option)}" for index, option in enumerate(question["options"])]
+        options = [f"<b>{chr(65 + index)})</b> {rich(option)}" for index, option in enumerate(question["options"])]
         result.append(Paragraph(" &nbsp; &nbsp; ".join(options), style_map["options"]))
         result.append(Spacer(1, 7))
     elif kind == "pieces":
@@ -177,6 +226,16 @@ def answer_text(question):
     for answer in answers:
         values.append(answer + " = " + answer.replace(" + ", "") if question["type"] == "pieces" else answer)
     return " / ".join(values)
+
+
+def answer_markup(question):
+    if question["type"] == "pieces":
+        values = []
+        for answer in question["answers"]:
+            stem, ending = answer.split(" + ", 1)
+            values.append(f'{esc(stem)} + {red(ending)} = {esc(stem)}{red(ending)}')
+        return Rich(" / ".join(values))
+    return Rich(rich(answer_text(question)))
 
 
 class TopicDoc(BaseDocTemplate):
@@ -217,8 +276,10 @@ class TopicDoc(BaseDocTemplate):
 
 def read_data(node):
     source = ROOT / "data/espanol-topics.js"
-    script = "import(process.argv[1]).then(m => process.stdout.write(JSON.stringify(m)))"
-    return json.loads(subprocess.check_output([node, "--input-type=module", "-e", script, source.as_uri()]).decode("utf-8"))
+    instructions = ROOT / "data/espanol-instructions.js"
+    script = ("Promise.all(process.argv.slice(1).map(p=>import(p))).then(([m,i]) => "
+              "process.stdout.write(JSON.stringify({topics:m.default||m.topics,instructions:i.instructions||i.default})))")
+    return json.loads(subprocess.check_output([node, "--input-type=module", "-e", script, source.as_uri(), instructions.as_uri()]).decode("utf-8"))
 
 
 def spanish(value):
@@ -235,15 +296,15 @@ def topic_support(topic, style_map):
         sets = [(topic.get("verb") or next((q.get("verb") for q in topic["questions"] if q.get("verb")), ""), forms)]
         sets += [(v["verb"], v["forms"]) for v in topic.get("additionalStudyForms", [])]
         if words:
-            story.append(Paragraph(" · ".join(f"<b>{esc(w['es'])}</b> = {esc(w['se'])} / {esc(w['nb'])}" for w in words), style_map["small"]))
+            story.append(Paragraph(" · ".join(f"<b>{rich(w['es'])}</b> = {esc(w['se'])} / {esc(w['nb'])}" for w in words), style_map["small"]))
         if len(sets) == 2:
-            rows = [[main[0], " + ".join(main[1:]) + " = " + "".join(main[1:]),
-                     " + ".join(second[1:]) + " = " + "".join(second[1:])]
+            rows = [[Rich(rich(main[0])), Rich(f'{esc(main[1])} + {red(main[2])} = {esc(main[1])}{red(main[2])}'),
+                     Rich(f'{esc(second[1])} + {red(second[2])} = {esc(second[1])}{red(second[2])}')]
                     for main, second in zip(sets[0][1], sets[1][1])]
             story.append(table(rows, style_map, [WIDTH*.32, WIDTH*.34, WIDTH*.34],
                                     ["Pronombre", sets[0][0], sets[1][0]]))
         else:
-            story.append(table([[p, f"{s} + {e}", s+e] for p,s,e in forms], style_map,
+            story.append(table([[Rich(rich(p)), Rich(f"{esc(s)} + {red(e)}"), Rich(esc(s)+red(e))] for p,s,e in forms], style_map,
                                     [WIDTH*.4, WIDTH*.3, WIDTH*.3], ["Pronombre", "Raíz + terminación", "Verbo"]))
     elif words:
         story.append(table([[w.get("es", ""), w.get("se", ""), w.get("nb", "")] for w in words], style_map,
@@ -252,8 +313,22 @@ def topic_support(topic, style_map):
     return story
 
 
-def build(topics, destination, font=None, bold_font=None):
+def build(topics, instructions, destination, font=None, bold_font=None):
     register_fonts(font, bold_font)
+    FORM_ENDINGS.clear()
+    group_endings = {}
+    for topic in topics:
+        sets = [topic.get("studyForms") or []] + [v["forms"] for v in topic.get("additionalStudyForms", [])]
+        for forms in sets:
+            for person, stem, ending in forms:
+                FORM_ENDINGS[(stem + ending).lower()] = ending
+        if topic.get("studyForms") and topic.get("studyWords"):
+            group_endings[topic["studyWords"][0].get("verbGroup")] = [row[2] for row in topic["studyForms"]]
+    for topic in topics:
+        for word in topic.get("studyWords", []):
+            if word.get("regularity") == "Regular" and word.get("verbGroup") in group_endings:
+                for ending in group_endings[word["verbGroup"]]:
+                    FORM_ENDINGS[word["es"][:-2] + ending] = ending
     destination.parent.mkdir(parents=True, exist_ok=True)
     st = styles()
     st["h1"].textColor = ACCENT
@@ -266,19 +341,23 @@ def build(topics, destination, font=None, bold_font=None):
         if ti > 1:
             story.append(PageBreak())
         story.append(Paragraph(f"{ti} · {esc(topic['title'])}", st["h1"]))
-        instruction = spanish(topic.get("instruction"))
-        if instruction:
-            story.append(Paragraph(esc(instruction), st["body"]))
         lesson = spanish(topic.get("lessonText"))
         if lesson:
-            story.append(Paragraph(esc(lesson), st["small"]))
+            story.append(Paragraph(rich(lesson, verbs=False), st["small"]))
         story += topic_support(topic, st)
         exercise_heading = [Paragraph("Practica", st["h2"])]
         endings = next((q["pieces"]["endings"] for q in topic["questions"] if q["type"] == "pieces"), None)
         if endings:
-            exercise_heading.append(Paragraph("<b>Terminaciones:</b> " + " · ".join(map(esc, endings)), st["body"]))
+            exercise_heading.append(Paragraph("<b>Terminaciones:</b> " + " · ".join(map(red, endings)), st["body"]))
+        previous_kind = None
         for qi, question in enumerate(topic["questions"], 1):
+            key = instruction_key(question)
+            start = exercise_heading if qi == 1 else []
+            if key != previous_kind:
+                start = start + [instruction_block(instructions[key], st)]
+            previous_kind = key
             if topic["title"] == "Palabras" and question["type"] == "write":
+                story.extend(start)
                 remaining = list(enumerate(topic["questions"][qi-1:], qi))
                 rows = []
                 for start in range(0, len(remaining), 2):
@@ -294,8 +373,8 @@ def build(topics, destination, font=None, bold_font=None):
                 ]))
                 story.append(columns)
                 break
-            if qi == 1:
-                story.append(KeepTogether(exercise_heading + question_card(question, f"{ti}.{qi}", st, keep=False)))
+            if start:
+                story.append(KeepTogether(start + question_card(question, f"{ti}.{qi}", st, keep=False)))
             else:
                 story.append(question_card(question, f"{ti}.{qi}", st))
 
@@ -304,18 +383,22 @@ def build(topics, destination, font=None, bold_font=None):
     heading.is_answer_heading = True
     story += [heading, Paragraph("Primero intenta responder. Después corrige con otro color.", st["body"])]
     for ti, topic in enumerate(topics, 1):
-        rows = [[f"{ti}.{qi}", answer_text(q)] for qi, q in enumerate(topic["questions"], 1)]
-        answer_block = [Paragraph(f"{ti} · {esc(topic['title'])}", st["h2"]),
-                        table(rows, st, [WIDTH*.12, WIDTH*.88], compact=True), Spacer(1, 5)]
-        story.append(KeepTogether(answer_block))
+        rows = [[f"{ti}.{qi}", answer_markup(q), Rich(rich(q["example"]))] for qi, q in enumerate(topic["questions"], 1)]
+        key_table = table(rows, st, [WIDTH*.10, WIDTH*.43, WIDTH*.47],
+                          ["", "Respuesta", "Ejemplo"], compact=True)
+        title = Paragraph(f"{ti} · {esc(topic['title'])}", st["h2"])
+        title.keepWithNext = True
+        story += [title, key_table, Spacer(1, 5)]
     doc.build(story)
     reader = PdfReader(destination)
     text = "\n".join(p.extract_text() or "" for p in reader.pages)
+    normal_text = " ".join(text.split())
     for ti, topic in enumerate(topics, 1):
         for qi, q in enumerate(topic["questions"], 1):
             assert f"{ti}.{qi}." in text
             for answer in q["answers"]:
-                assert clean(answer) in text, answer
+                assert " ".join(clean(answer).split()) in normal_text, answer
+            assert " ".join(clean(q["example"]).split()) in normal_text, q["example"]
     assert "Estoy OK" in text
     for forbidden in ["Semana", "semana", "Vahkku", "Uke", "15-20", "Iešárvvoštallan"]:
         assert forbidden not in text, forbidden
@@ -357,7 +440,7 @@ def main():
             "studyForms":sections[0].get("studyForms"),
             "additionalStudyForms":[{"verb":s["questions"][0]["verb"], "forms":s["studyForms"]} for s in sections[1:] if s.get("studyForms")],
         })
-    print(json.dumps(build(merged, args.output.resolve(), args.font, args.bold_font), ensure_ascii=False, indent=2))
+    print(json.dumps(build(merged, module["instructions"], args.output.resolve(), args.font, args.bold_font), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

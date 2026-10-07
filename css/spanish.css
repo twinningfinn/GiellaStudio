@@ -74,6 +74,27 @@ body.spanish { --bg:#ffad52; --surface:#fffdf5; --ink:#382410; --muted:#634326; 
 .topic-report p { margin:4px 0; }
 .report-status { font-size:12px; color:#634326; }
 .spanish .review-jumps { background:#fff0b7; }
+.spanish .person,.spanish .ending { color:#b32132; }
+body.spanish #chosen-ending {color:#b32132;}
+.spanish .word strong {color:var(--ink);}
+.spanish .flash-word[lang=es] { color:var(--ink); }
+.spanish .endings button:disabled {opacity:1;}
+.spanish .endings button .ending {text-decoration:none;}
+.instruction-es {display:block;}
+.instruction-support {display:flex; flex-wrap:wrap; gap:2px 16px; margin-top:5px; font-size:13px; line-height:1.4; font-weight:400; color:#634326;}
+.activity-instruction {font-weight:600;}
+.activity-line>span:last-child {white-space:nowrap;}
+.spanish .quiz-instruction {font-size:16px; margin-bottom:24px;}
+.verb-cue {font-size:15px; font-weight:600; color:#634326; margin:0 0 8px;}
+.answer-slot {display:inline-block; min-width:1.5em; text-decoration:underline; text-underline-offset:5px;}
+.sentence-example {font-size:22px; line-height:1.45; color:var(--ink); font-weight:600; margin:8px 0 0;}
+.feedback-form {font-size:16px; margin-top:8px!important;}
+.card-example {font-size:18px; line-height:1.5; color:var(--ink); margin-top:24px; padding-top:16px; border-top:1px solid #d8ba7f;}
+.game-feedback {margin:10px 0 18px;}
+.game-feedback:has(.sentence-example) {background:#fffdf5; padding:12px 16px; border-radius:12px; border-left:4px solid #638348;position:sticky;top:8px;z-index:2;}
+.topic-report .sentence-example {font-size:16px;}
+@media(max-width:550px) {.instruction-support {display:grid;gap:2px;} .sentence-example {font-size:20px;} .quiz-panel h2 {font-size:26px;line-height:1.45;} }
+@media print {.instruction-support {font-size:9pt;} .topic-report .sentence-example {font-size:10pt;} }
 @keyframes card-turn { from {transform:rotateY(12deg);opacity:.7;} to {transform:rotateY(0);opacity:1;} }
 @media(max-width:850px) { .topic-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:550px) { .spanish main {padding:26px 18px 40px;} .topic-grid { gap:14px; } .topic-tile { min-height:218px; padding:18px 14px; border-radius:18px; } .topic-tile h2 {font-size:20px; } .tile-symbol {font-size:26px; margin-bottom:18px;} .tile-footer {font-size:11px; align-items:flex-end;} .tile-footer>span:first-child {max-width:100px;} .memory-grid {grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;} .memory-card {min-height:108px;} .flashcard {min-height:295px; padding-left:20px; padding-right:20px;} .match-grid {gap:10px;} .match-card {font-size:15px;} .spanish .quiz-panel {padding:20px 16px;} .topic-heading h1 {font-size:32px;} }

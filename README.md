@@ -6,13 +6,13 @@ Väliaikainen, kokonaan staattinen luokkahuoneversio. Oppilas avaa tehtävälink
 
 Oppilaan etusivu: https://twinningfinn.github.io/GiellaStudio/espanja/
 
-Seitsemän laatikkoa: AR-verbos, IR-verbos, ER-verbos, Saludos y frases, Números 1–15, Pronombres ja Palabras. Jokainen avautuu sanakortteihin; oppilas voi siirtyä yhdistämiseen tai muistipeliin ja omaan Reto-tehtäväsarjaan. Aikarajaa ei ole. Lyhyet espanjankieliset käyttötekstit ja alkuperäisen prototyypin lämmin oranssi/terrakotta-paletti.
+Seitsemän laatikkoa: AR-verbos, IR-verbos, ER-verbos, Saludos y frases, Números 1–15, Pronombres ja Palabras. Jokainen avautuu sanakortteihin; oppilas voi siirtyä yhdistämiseen tai muistipeliin ja omaan Reto-tehtäväsarjaan. Aikarajaa ei ole. Lyhyet espanjan-, saamen- ja norjankieliset ohjeet ja alkuperäisen prototyypin lämmin oranssi/terrakotta-paletti.
 
-Kaikki 101 tehtävää ovat säilyneet. Lähteenä on opettajan uusin espanol_geardduheapmi_ovingshefte1.pdf: sivulla 10 on **Estoy OK**. Gente 8:n sivuja ei kopioida. Vanhojen oppilaslinkkien avaaminen ohjaa aihevalikkoon. Aiemmat vastaukset tuodaan samoilla tehtävätunnisteilla aihekohtaiseen tallennukseen, jos ne ovat samassa selaimessa.
+Kaikki 101 tehtävää ovat säilyneet. Verbien Reto-tehtävissä on lauseaukko; kaikissa tehtävissä ja peleissä oikean vastauksen jälkeen näkyy helppo esimerkkilause. Espanjan persoonapronominit ja säännöllisten verbien persoonapäätteet korostuvat punaisina. Lähteenä on opettajan uusin espanol_geardduheapmi_ovingshefte1.pdf: sivulla 10 on **Estoy OK**. Gente 8:n sivuja ei kopioida. Vanhojen oppilaslinkkien avaaminen ohjaa aihevalikkoon. Aiemmat vastaukset tuodaan samoilla tehtävätunnisteilla aihekohtaiseen tallennukseen, jos ne ovat samassa selaimessa.
 
 **Opettajan katsaus:** https://twinningfinn.github.io/GiellaStudio/opettaja/katsaus/ näyttää kaikki tehtävät, kortit ja peliparit. Mallivastaukset saa piiloon. Katsaus ei käsittele oppilaan tallennuksia.
 
-**PDF:** output/pdf/espanol-temas.pdf sisältää tehtävät aiheittain sivuilla 1–9 ja vastaukset sivuilla 10–12. Vanhojen PDF-linkkien takana on sama päivitetty paketti. Oppilaan omat vastaukset voi tulostaa myös kesken harjoittelun kohdasta **Mis respuestas · PDF**. Tallenna selaimen tulostuksella PDF:ksi ja palauta Teamsiin. Kortit ja pelit ovat harjoittelua; Reto-raportissa näkyvät tehtäväyritykset, tarkistamaton luonnos ja käytetty apu.
+**PDF:** output/pdf/espanol-temas.pdf sisältää tehtävät aiheittain sivuilla 1–9 ja vastaukset esimerkkilauseineen sivuilla 10–13. Vanhojen PDF-linkkien takana on sama päivitetty paketti. Oppilaan omat vastaukset voi tulostaa myös kesken harjoittelun kohdasta **Mis respuestas · PDF**. Tallenna selaimen tulostuksella PDF:ksi ja palauta Teamsiin. Kortit ja pelit ovat harjoittelua; Reto-raportissa näkyvät tehtäväyritykset, tarkistamaton luonnos ja käytetty apu.
 
 Espanjan edistyminen tallentuu tällä laitteella selaimen localStorageen. Verkkosivu tarvitsee yhteyden avautuessaan; ladattu PDF toimii ilman yhteyttä. Vastauksia ei lähetetä palvelimelle. Muut aineet käyttävät aiempaa tallennustapaa.
 

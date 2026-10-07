@@ -2,17 +2,24 @@ import {
   bi, greetings, numerals, numberWords, pronouns, wordList, verbWords,
   formsFor, conjugate, choose, writeWord
 } from './espanol-campo-content.js';
+import { verbExample, wordExample, questionExample } from './espanol-examples.js';
+import { instructions } from './espanol-instructions.js';
 
 // Question IDs and accepted answers stay stable so saved work can be migrated.
 // The topics themselves have no dates, weeks, or required working order.
 const letters = ['á', 'é', 'í', 'ó', 'ú', 'ñ', '¿', '¡'];
 const cardsFor = words => words.map(({ es, se, nb, ...metadata }) => ({
-  front: es, back: nb, se, nb, ...metadata
+  front: es, back: nb, se, nb, example: wordExample(es), ...metadata
 }));
-const pairsFor = (words, indexes) => indexes.map(i => ({ left: words[i].es, right: words[i].nb }));
+const pairsFor = (words, indexes) => indexes.map(i => ({ left: words[i].es, right: words[i].nb, example: wordExample(words[i].es) }));
+const questionInstruction = q => q.type === 'choice' ? instructions.choice
+  : q.type === 'pieces' ? instructions.pieces : q.verb ? instructions.writeVerb : instructions.write;
 const pack = (id, slug, title, symbol, game, cards, pairs, sections, metadata = {}) => ({
   id, slug, title, symbol, game, version: 1, persistent: true,
-  worksheet: 'output/pdf/espanol-temas.pdf', letters, cards, pairs, sections, ...metadata
+  worksheet: 'output/pdf/espanol-temas.pdf', letters, cards, pairs,
+  sections: sections.map(section => ({ ...section, questions: section.questions.map(q => ({
+    ...q, ...questionExample(q), instruction: questionInstruction(q)
+  })) })), ...metadata
 });
 
 function verbTopic(group, primary, secondary, game) {
@@ -20,24 +27,24 @@ function verbTopic(group, primary, secondary, game) {
   const words = verbWords.filter(word => word.es === primary || word.es === secondary);
   const cards = [
     ...cardsFor(words),
-    ...[primary, secondary].flatMap(verb => formsFor(verb).map(([person, stem, ending]) => ({
+    ...[primary, secondary].flatMap(verb => formsFor(verb).map(([person, stem, ending], i) => ({
       front: `${person} · ${verb}`, back: stem + ending,
-      regularity: 'Regular', verbGroup: `-${group}`
+      regularity: 'Regular', verbGroup: `-${group}`, ...verbExample(verb, i)
     })))
   ];
   return pack(`espanol-${tag}`, `${tag}-verbos`, `${group}-verbos`, `-${group}`, game, cards,
-    formsFor(primary).map(([person, stem, ending]) => ({ left: `${person} · ${primary}`, right: stem + ending })),
+    formsFor(primary).map(([person, stem, ending], i) => ({ left: `${person} · ${primary}`, right: stem + ending, ...verbExample(primary, i) })),
     [
       {
         id: `verbos-${tag}-construye`, title: `Construye · ${primary}`,
-        instruction: { es: 'Elige la terminación.' },
+        instruction: instructions.pieces,
         lessonText: { es: `${primary} → ${primary.slice(0, -2)} + terminación. Regular.` },
         studyWords: words, studyForms: formsFor(primary),
         questions: formsFor(primary).map((_, i) => conjugate(`s2-${tag}-build-${i}`, primary, i, 'pieces'))
       },
       {
         id: `verbos-${tag}-escribe`, title: `Escribe · ${secondary}`,
-        instruction: { es: 'Escribe la forma del verbo.' },
+        instruction: instructions.writeVerb,
         lessonText: { es: `${secondary} → ${secondary.slice(0, -2)} + terminación. Regular.` },
         studyWords: words, studyForms: formsFor(secondary),
         questions: formsFor(secondary).map((_, i) => conjugate(`s2-${tag}-write-${i}`, secondary, i, 'write'))
@@ -90,7 +97,7 @@ vocabularyQuestions.push(
 function wordTopic(id, slug, title, symbol, game, words, indexes, qs, lesson) {
   return pack(id, slug, title, symbol, game, cardsFor(words), pairsFor(words, indexes), [{
     id: slug, title,
-    instruction: { es: 'Elige o escribe la respuesta.' },
+    instruction: { es: 'Elige o escribe la respuesta.', se: 'Vállje rievttes vástádusa. Čále de ieš.', nb: 'Velg riktig svar, eller skriv selv.' },
     lessonText: { es: lesson }, studyWords: words, questions: qs
   }]);
 }
