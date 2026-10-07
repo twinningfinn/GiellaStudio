@@ -1,0 +1,8 @@
+.teacher-gate {max-width:520px!important; padding-top:64px;}
+.teacher-gate h1 {font-size:30px;}
+.teacher-gate label {display:block;margin:22px 0 8px;font-weight:600;}
+.teacher-gate input {display:block;width:100%;padding:14px;border:2px solid #a98462;border-radius:12px;font:inherit;background:#fff; margin-bottom:18px;}
+.teacher-gate button {width:100%;}
+#code-status {min-height:24px;margin-top:16px;color:#b32132;}
+#lock-teacher {font-size:14px;min-height:40px;padding:8px 16px;}
+@media print {.teacher-gate {display:none!important;}}

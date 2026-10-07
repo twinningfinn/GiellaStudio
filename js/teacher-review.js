@@ -2,7 +2,9 @@ import { packages } from '../data/packages.js?v=20261007-sentences';
 import { url, esc, bi, promptText, header, focusMain } from './ui.js?v=20261007-fieldpack';
 import { grammarText, instructionMarkup, questionLabel, answerMarkup } from './spanish-text.js';
 import { instructions } from '../data/espanol-instructions.js';
+import {requireTeacherCode} from './teacher-gate.js?v=20261007-teacher-lock';
 
+await requireTeacherCode();
 header();
 const main = document.querySelector('main');
 main.classList.add('teacher-review');

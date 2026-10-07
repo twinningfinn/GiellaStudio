@@ -5,6 +5,7 @@ Install: python -m pip install reportlab pypdf
 Run: python tools/build-topic-pdf.py
 Optional: --node /path/to/node --font /path/to/regular.ttf --bold-font /path/to/bold.ttf
 Use --output to build a review copy without replacing output/pdf/espanol-temas.pdf.
+The public PDF contains exercises only. --with-answers requires --output under _local/.
 Segoe UI is preferred on Windows; DejaVu Sans is the automatic Linux fallback.
 The same fonts and source data reproduce the approved page layout.
 """
@@ -313,7 +314,9 @@ def topic_support(topic, style_map):
     return story
 
 
-def build(topics, instructions, destination, font=None, bold_font=None):
+def build(topics, instructions, destination, font=None, bold_font=None, with_answers=False):
+    if with_answers and not destination.resolve().is_relative_to((ROOT / "_local").resolve()):
+        raise ValueError("Answer copies must use a separate --output under _local/.")
     register_fonts(font, bold_font)
     FORM_ENDINGS.clear()
     group_endings = {}
@@ -378,17 +381,18 @@ def build(topics, instructions, destination, font=None, bold_font=None):
             else:
                 story.append(question_card(question, f"{ti}.{qi}", st))
 
-    story.append(PageBreak())
-    heading = Paragraph("Respuestas", st["h1"])
-    heading.is_answer_heading = True
-    story += [heading, Paragraph("Primero intenta responder. Después corrige con otro color.", st["body"])]
-    for ti, topic in enumerate(topics, 1):
-        rows = [[f"{ti}.{qi}", answer_markup(q), Rich(rich(q["example"]))] for qi, q in enumerate(topic["questions"], 1)]
-        key_table = table(rows, st, [WIDTH*.10, WIDTH*.43, WIDTH*.47],
-                          ["", "Respuesta", "Ejemplo"], compact=True)
-        title = Paragraph(f"{ti} · {esc(topic['title'])}", st["h2"])
-        title.keepWithNext = True
-        story += [title, key_table, Spacer(1, 5)]
+    if with_answers:
+        story.append(PageBreak())
+        heading = Paragraph("Respuestas", st["h1"])
+        heading.is_answer_heading = True
+        story += [heading, Paragraph("Primero intenta responder. Después corrige con otro color.", st["body"])]
+        for ti, topic in enumerate(topics, 1):
+            rows = [[f"{ti}.{qi}", answer_markup(q), Rich(rich(q["example"]))] for qi, q in enumerate(topic["questions"], 1)]
+            key_table = table(rows, st, [WIDTH*.10, WIDTH*.43, WIDTH*.47],
+                              ["", "Respuesta", "Ejemplo"], compact=True)
+            title = Paragraph(f"{ti} · {esc(topic['title'])}", st["h2"])
+            title.keepWithNext = True
+            story += [title, key_table, Spacer(1, 5)]
     doc.build(story)
     reader = PdfReader(destination)
     text = "\n".join(p.extract_text() or "" for p in reader.pages)
@@ -396,9 +400,12 @@ def build(topics, instructions, destination, font=None, bold_font=None):
     for ti, topic in enumerate(topics, 1):
         for qi, q in enumerate(topic["questions"], 1):
             assert f"{ti}.{qi}." in text
-            for answer in q["answers"]:
-                assert " ".join(clean(answer).split()) in normal_text, answer
-            assert " ".join(clean(q["example"]).split()) in normal_text, q["example"]
+            if with_answers:
+                for answer in q["answers"]:
+                    assert " ".join(clean(answer).split()) in normal_text, answer
+                assert " ".join(clean(q["example"]).split()) in normal_text, q["example"]
+    if not with_answers:
+        assert doc.answer_page is None and "RESPUESTAS" not in text and "Respuestas" not in text
     assert "Estoy OK" in text
     for forbidden in ["Semana", "semana", "Vahkku", "Uke", "15-20", "Iešárvvoštallan"]:
         assert forbidden not in text, forbidden
@@ -412,6 +419,7 @@ def main():
     parser.add_argument("--node", default=shutil.which("node"), help="Node.js executable (defaults to PATH).")
     parser.add_argument("--font", type=Path, help="Regular Unicode TrueType font.")
     parser.add_argument("--bold-font", type=Path, help="Bold Unicode TrueType font.")
+    parser.add_argument("--with-answers", action="store_true", help="Include answers in a private copy under _local/ only.")
     parser.add_argument("--output", type=Path, default=ROOT / "output/pdf/espanol-temas.pdf",
                         help="Output PDF (defaults to the repository's topic worksheet).")
     args = parser.parse_args()
@@ -419,6 +427,8 @@ def main():
         parser.error("Node.js was not found. Install Node.js or pass --node /path/to/node.")
     if bool(args.font) != bool(args.bold_font):
         parser.error("Pass both --font and --bold-font, or neither.")
+    if args.with_answers and not args.output.resolve().is_relative_to((ROOT / "_local").resolve()):
+        parser.error("--with-answers requires a separate --output PDF under _local/.")
     module = read_data(args.node)
     data = module.get("default") or module.get("topics")
     if isinstance(data, dict):
@@ -440,7 +450,7 @@ def main():
             "studyForms":sections[0].get("studyForms"),
             "additionalStudyForms":[{"verb":s["questions"][0]["verb"], "forms":s["studyForms"]} for s in sections[1:] if s.get("studyForms")],
         })
-    print(json.dumps(build(merged, module["instructions"], args.output.resolve(), args.font, args.bold_font), ensure_ascii=False, indent=2))
+    print(json.dumps(build(merged, module["instructions"], args.output.resolve(), args.font, args.bold_font, args.with_answers), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

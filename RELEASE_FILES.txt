@@ -9,6 +9,7 @@ assets/cactus.png
 assets/icon.svg
 css/spanish.css
 css/style.css
+css/teacher-gate.css
 css/teacher-review.css
 data/espanol-campo-content.js
 data/espanol-examples.js
@@ -42,6 +43,9 @@ js/legacy-topics.js
 js/pieces.js
 js/spanish-text.js
 js/student.js
+js/teacher-code.js
+js/teacher-entry.js
+js/teacher-gate.js
 js/teacher-review.js
 js/topic-state.js
 js/topic.js
@@ -65,6 +69,7 @@ tests/espanol.test.mjs
 tests/examples.test.mjs
 tests/sami.test.mjs
 tests/spanish-text.test.mjs
+tests/teacher-gate.test.mjs
 tests/topic-state.test.mjs
 tests/topics.test.mjs
 tools/build-field-pdfs.py
